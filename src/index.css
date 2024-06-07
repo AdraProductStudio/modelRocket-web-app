@@ -1,13 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: "Inter", sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+.content-preference-section .title{
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.cup:hover{
+  cursor: pointer;
+}
+
+::-webkit-scrollbar{
+  width: 0 !important;
+}
+
+:root{
+  --nav-height:11vh;
+  --main-body-height:89vh;
+  --breadcrumps-height:7.5vh;
+  --nav-bg-color:white;
+  --body-bg-color:#65a3ff35;
+}
+
+
+.nav-height{
+  height: var(--nav-height);
+  background-color: var(--nav-bg-color);
+
+}
+
+.content-body-height{
+  height: var(--main-body-height);
+  background-color: var(--body-bg-color);
+}
+
+.content-breadcrumps-height{
+  height:var(--breadcrumps-height);
+}
+
+
+.content-breadcrumps-below-content-height{
+  height:calc(var(--main-body-height) - var(--breadcrumps-height));
+}
+
+.card-title{
+  font-size: .9rem;
+}
+
+.card-text{
+  font-size: .75rem;
+  color: gray;
+}
+
+.category-card-title{
+  color:rgb(89, 21, 116);
+  font-size: 1.5rem;
+}
+
+.category-card-height{
+  height: 90% !important;
+}
+
+.icon-absolute{
+  position: absolute;
+  width: 3rem;
+  height: 3rem;
+  background-color: antiquewhite;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  
+}
+.chain-card{
+  background-color: rgba(218, 21, 116, 0.073) !important;
+  border-color: rgba(218, 21, 116, 0.073) !important;
+}
+.chain-abs{
+  background-color: rgb(218, 21, 116);
+}
+
+.ring-card{
+  background-color: rgba(231, 150, 36, 0.073) !important;
+  border-color: rgb(231, 150, 36, 0.073) !important;
+}
+.ring-abs{
+  background-color: rgb(231, 150, 36);
+}
+
+.bracelets-card{
+  background-color: rgb(15, 204, 68, 0.073) !important;
+  border-color: rgb(15, 204, 68, 0.073)!important;
+}
+.bracelets-abs{
+  background-color: rgb(15, 204, 68);
+}
+
+.earring-card{
+  background-color: rgb(129, 38, 182, 0.073) !important;
+  border-color: rgb(129, 38, 182, 0.073) !important;
+}
+.earring-abs{
+  background-color: rgb(129, 38, 182);
+}
+.link-fontWeight{
+  font-weight: 500;
+}
+
+
+
