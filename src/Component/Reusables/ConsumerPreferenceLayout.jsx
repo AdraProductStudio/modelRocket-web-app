@@ -13,6 +13,7 @@ const ConsumerPreferenceLayout = () => {
 
   const [recommendedData, setRecommendedData] = useState([]);
   const [mainCriteriaPairs, setMainCriteriaPairs] = useState([]);
+  const [data, setData] = useState([""])
 
   useEffect(() => {
     const get_attributes = async () => {
@@ -20,13 +21,12 @@ const ConsumerPreferenceLayout = () => {
         client_id: localStorage.getItem("client_id"),
         product_category_id: localStorage.getItem("product_category_id"),
       };
-
-      console.log(getProduct);
+      
 
       try {
         await axiosInstance.post("/get_attributes", getProduct).then((res) => {
           console.log(res.data.data);
-          setRecommendedData(res.data.data);
+          setRecommendedData(res.data.data[0]);
           setMainCriteriaPairs(res.data.data[0].main_criteria_pairs);
         });
       } catch (err) {
@@ -102,22 +102,15 @@ const ConsumerPreferenceLayout = () => {
                       alt="loading-gif"
                     />
                   </div>
-                ) : recommendedData.length ? (
+                ) : data.length ? (
                   <div>
                     <h4 className="title mb-1 pt-4 mb-3 px-4">
                       Top Recommendations
                     </h4>
                     <div className="top-recommendation-card-container  px-4">
-                      <div className="card mb-3">
+                    <div className="card mb-3 p-0 ">
                         <div className="row g-0 ">
-                          <div className="card col-md-4 p-4 border-0">
-                            <img
-                              src="https://png.pngtree.com/png-clipart/20231006/ourmid/pngtree-gold-necklace-on-red-mannequin-isolated-white-background-3d-rendering-png-image_10193677.png"
-                              className="img-fluid rounded-start border rounded-3"
-                              alt="..."
-                            />
-                          </div>
-                          <div className="col-md-8">
+                          <div className="col-md-12">
                             <div className="card-body mb-0">
                               <h5 className="card-title fw-bold">
                                 Radiant Rose Pendant
