@@ -5,7 +5,6 @@ import { GiDiamondRing } from "react-icons/gi";
 import { GiHeartEarrings } from "react-icons/gi";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../Services/axiosInstance";
-import axios from "axios";
 
 const Category = () => {
   const pageRender = useNavigate();
@@ -36,11 +35,15 @@ const Category = () => {
     },
   ];
 
-  const [productCategory, setProductCategory] = useState([])
+  const [productCategory, setProductCategory] = useState([]);
   const randomColor = () => {
     var rand = Math.floor(Math.random() * 4);
     return category[rand];
   };
+
+
+
+ 
 
   useEffect(() => {
     const fetchClientProduct = async () => {
@@ -49,13 +52,10 @@ const Category = () => {
       };
 
       try {
-        await axios
-          .post(
-            "https://consumerapi.matsuritech.com/get_product_categories",
-            getProduct
-          )
+        await axiosInstance
+          .post("/get_product_categories", getProduct)
           .then((res) => {
-            setProductCategory(res.data.data)            
+            setProductCategory(res.data.data);                     
           });
       } catch (err) {
         console.log(err);
@@ -68,6 +68,12 @@ const Category = () => {
 
     fetchClientProduct();
   }, []);
+
+  const redirectConsumerPreferencePage = (id) => {
+    localStorage.setItem("product_category_id",id)
+    pageRender("consumer_preference")
+  }
+  
   return (
     <div className="content-breadcrumps-below-content-height w-100">
       <div className="w-100 py-4 h-100">
@@ -79,8 +85,8 @@ const Category = () => {
               {productCategory.map((v, i) => {
                 return (
                   <div
-                    className="col-12 col-sm-6 col-lg-3"
-                    onClick={() => pageRender("consumer_preference")}
+                    className="col-12 col-sm-6 col-lg-3" key={i}
+                    onClick={()=>redirectConsumerPreferencePage(v.id)}
                   >
                     <div
                       className={`card rounded-4 ${randomColor().cardName} cup`}
@@ -90,12 +96,12 @@ const Category = () => {
                           <div
                             className={`icon-absolute ${randomColor().cardAbs}`}
                           >
-                             <img
-                    src={`https://cdn.matsuritech.com/product/${v.name}.png`}                   
-                    width={30}
-                    height={30}
-                    alt="..."
-                  />
+                            <img
+                              src={`https://cdn.matsuritech.com/product/${v.name}.png`}
+                              width={30}
+                              height={30}
+                              alt="..."
+                            />
                           </div>
                         </div>
                         <h5 className="pt-5 ps-1 fw-bold text-dark bg">

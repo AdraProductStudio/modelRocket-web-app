@@ -26,6 +26,9 @@
     height: 70vh !important;
     overflow-y: auto;
 }
+.sliderText{
+  font-size: .9rem;
+}
 
 .form-control.slider {
     -webkit-appearance: none;
