@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BiLoaderCircle } from "react-icons/bi";
 import { GiGemPendant } from "react-icons/gi";
 import { GiDiamondRing } from "react-icons/gi";
 import { GiHeartEarrings } from "react-icons/gi";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../Services/axiosInstance";
+import axios from "axios";
 
-const Category = (categoryType) => {
+const Category = () => {
   const pageRender = useNavigate();
   const category = [
     {
@@ -34,6 +36,38 @@ const Category = (categoryType) => {
     },
   ];
 
+  const [productCategory, setProductCategory] = useState([])
+  const randomColor = () => {
+    var rand = Math.floor(Math.random() * 4);
+    return category[rand];
+  };
+
+  useEffect(() => {
+    const fetchClientProduct = async () => {
+      const getProduct = {
+        client_id: localStorage.getItem("client_id"),
+      };
+
+      try {
+        await axios
+          .post(
+            "https://consumerapi.matsuritech.com/get_product_categories",
+            getProduct
+          )
+          .then((res) => {
+            setProductCategory(res.data.data)            
+          });
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (localStorage.getItem("client_id") !== null) {
+      fetchClientProduct();
+    }
+
+    fetchClientProduct();
+  }, []);
   return (
     <div className="content-breadcrumps-below-content-height w-100">
       <div className="w-100 py-4 h-100">
@@ -42,22 +76,30 @@ const Category = (categoryType) => {
             <h5 className="category-card-title">Product Category</h5>
 
             <div className="w-100 row g-3 pt-4">
-            
-              {category.map((v, i) => {
+              {productCategory.map((v, i) => {
                 return (
                   <div
                     className="col-12 col-sm-6 col-lg-3"
-                    onClick={() =>pageRender("consumer_preference")}
+                    onClick={() => pageRender("consumer_preference")}
                   >
-                    <div className={`card rounded-4 ${v.cardName} cup`}>
+                    <div
+                      className={`card rounded-4 ${randomColor().cardName} cup`}
+                    >
                       <div className="card-body p-4">
                         <div className="position-relative pb-3">
-                          <div className={`icon-absolute ${v.cardAbs}`}>
-                            {v.icon}
+                          <div
+                            className={`icon-absolute ${randomColor().cardAbs}`}
+                          >
+                             <img
+                    src={`https://cdn.matsuritech.com/product/${v.name}.png`}                   
+                    width={30}
+                    height={30}
+                    alt="..."
+                  />
                           </div>
                         </div>
                         <h5 className="pt-5 ps-1 fw-bold text-dark bg">
-                          {v.category}
+                          {v.name}
                         </h5>
                       </div>
                     </div>

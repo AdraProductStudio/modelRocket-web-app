@@ -22,13 +22,7 @@ const Home = () => {
 
   const redirectCategoryPage = async (id) => {   
         localStorage.setItem("client_id",id)    
-        pageRender("/category")
-    // try {
-    //     await axiosInstance.get("/get_product_categories", {client_id:id})
-    //     .then((response)=>{
-    //         console.log(response.data)
-    //     })
-    // } catch (err) {}
+        pageRender("/category")  
   };
 
   return (
@@ -40,7 +34,7 @@ const Home = () => {
               <div className="card-body">
                 <div className="py-3">
                   <img
-                    src={require("./assets/pk-jwel.jpeg")}
+                    src={`https://cdn.matsuritech.com/client/${product.name}.png`}
                     height={200}
                     className="rounded-4 w-100"
                     alt="..."
