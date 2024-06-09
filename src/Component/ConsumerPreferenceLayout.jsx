@@ -3,8 +3,8 @@ import axiosInstance from "../../Services/axiosInstance";
 import toast from "react-hot-toast";
 
 const ConsumerPreferenceLayout = () => {
-  const [initialGlow, setInitialGlow] = useState(false);
-  const dummySlider = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+  const [initialGlow,setInitialGlow]=useState(false);
+  const dummySlider=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
 
   const [loading, setLoading] = useState(false);
   const [mainCriteriaPairs, setMainCriteriaPairs] = useState([]);
@@ -52,47 +52,26 @@ const ConsumerPreferenceLayout = () => {
 
   const convertSliderValue = (value) => {
     switch (value) {
-      // case 1:
-      //   return 1 / 5;
-      // case 2:
-      //   return 1 / 4;
-      // case 3:
-      //   return 1 / 3;
-      // case 4:
-      //   return 1 / 2;
-      // case 5:
-      //   return 1;
-      // case 6:
-      //   return 2;
-      // case 7:
-      //   return 3;
-      // case 8:
-      //   return 4;
-      // case 9:
-      //   return 5;
-      // default:
-      //   return 1; // Default to 1 if value is out of range
-
       case 1:
-        return 5;
+        return 1 / 5;
       case 2:
-        return 4;
+        return 1 / 4;
       case 3:
-        return 3;
+        return 1 / 3;
       case 4:
-        return 2;
+        return 1 / 2;
       case 5:
         return 1;
       case 6:
-        return 1 / 2;
+        return 2;
       case 7:
-        return 1 / 3;
+        return 3;
       case 8:
-        return 1 / 4;
+        return 4;
       case 9:
-        return 1 / 5;
+        return 5;
       default:
-        return 1;
+        return 1; // Default to 1 if value is out of range
     }
   };
 
@@ -185,58 +164,58 @@ const ConsumerPreferenceLayout = () => {
                 </h4>
                 <div className="range-bar-container slidecontainer  px-4 ">
                   <>
-                    {
-                      initialGlow ?
-                        dummySlider.map((v, i) => {
-                          return <div className="d-flex my-4 align-items-center" key={i}>
-                            <p className="p-2 mb-0 w-25 sliderText py-2 rounded-1 placeholder mx-4"></p>
+                  { 
+                  initialGlow ? 
+                      dummySlider.map((v,i)=>{
+                        return  <div className="d-flex my-4 align-items-center" key={i}>
+                        <p className="p-2 mb-0 w-25 sliderText py-2 rounded-1 placeholder mx-4"></p>
+                        <div className="p-2 mb-0 flex-grow-1">
+                          <input
+                            type="range"
+                            className="form-control slider w-100 placeholder pe-none"
+                            min="1"
+                            max="9"
+                            step="5"
+                           
+                          />
+                        </div>
+                        <p className="p-2 mb-0 w-25 sliderText py-2 rounded-1 placeholder mx-4"> </p>
+                      </div>
+                      })
+                     
+                    :
+                    mainCriteriaPairs &&
+                      mainCriteriaPairs.map((pair, index) => {
+                        const key = `slider-${index}`; // Unique key for each slider
+                        return (
+                          <div
+                            className="d-flex my-4 align-items-center"
+                            key={key}
+                          >
+                            <p className="p-2 mb-0 w-25 sliderText">
+                              {pair[0]}
+                            </p>
                             <div className="p-2 mb-0 flex-grow-1">
                               <input
                                 type="range"
-                                className="form-control slider w-100 placeholder pe-none"
+                                className="form-control slider w-90"
                                 min="1"
                                 max="9"
-                                step="5"
-
+                                step="1"
+                                id={key}
+                                value={sliderValues[index] || 5} // Use default value if sliderValues[index] is falsy
+                                onChange={(event) =>
+                                  handleSliderChange(index, event)
+                                } // Event handler
                               />
                             </div>
-                            <p className="p-2 mb-0 w-25 sliderText py-2 rounded-1 placeholder mx-4"> </p>
+                            <p className="p-2 mb-0 w-25 sliderText">
+                              {pair[1]}
+                            </p>
                           </div>
-                        })
-
-                        :
-                        mainCriteriaPairs &&
-                        mainCriteriaPairs.map((pair, index) => {
-                          const key = `slider-${index}`; // Unique key for each slider
-                          return (
-                            <div
-                              className="d-flex my-4 align-items-center"
-                              key={key}
-                            >
-                              <p className="p-2 mb-0 w-25 sliderText">
-                                {pair[0]}
-                              </p>
-                              <div className="p-2 mb-0 flex-grow-1">
-                                <input
-                                  type="range"
-                                  className="form-control slider w-90"
-                                  min="1"
-                                  max="9"
-                                  step="1"
-                                  id={key}
-                                  value={sliderValues[index] || 5} // Use default value if sliderValues[index] is falsy
-                                  onChange={(event) =>
-                                    handleSliderChange(index, event)
-                                  } // Event handler
-                                />
-                              </div>
-                              <p className="p-2 mb-0 w-25 sliderText">
-                                {pair[1]}
-                              </p>
-                            </div>
-                          );
-                        })
-                    }
+                        );
+                      })
+                  }
                   </>
                 </div>
 
@@ -282,34 +261,34 @@ const ConsumerPreferenceLayout = () => {
                             </div>
                           </div>
                           <div className="container-fluid my-3 mb-4">
-                            <div className="row mx-0">
-                              {/* Mapping non-quantified values into item.features */}
-                              {item["non-quantified-values"].map((feature, index) => {
-                                // Get the label and value from each feature object
-                                const label = Object.keys(feature)[0]; // Extracting the label
-                                const value = feature[label]; // Extracting the value
+                          <div className="row mx-0">
+  {/* Mapping non-quantified values into item.features */}
+  {item["non-quantified-values"].map((feature, index) => {
+    // Get the label and value from each feature object
+    const label = Object.keys(feature)[0]; // Extracting the label
+    const value = feature[label]; // Extracting the value
 
-                                // Calculate the width of the column dynamically based on the length of the label and value
-                                const labelWidth = `${(label.length + 2) * 10}px`; // Adjust the multiplier according to your font size and padding
-                                const valueWidth = `${(value.length + 5) * 10}px`; // Adjust the multiplier according to your font size and padding
-                                const columnWidth = label.length > value.length ? labelWidth : valueWidth;
+    // Calculate the width of the column dynamically based on the length of the label and value
+    const labelWidth = `${(label.length + 2) * 10}px`; // Adjust the multiplier according to your font size and padding
+    const valueWidth = `${(value.length + 2) * 10}px`; // Adjust the multiplier according to your font size and padding
+    const columnWidth = label.length > value.length ? labelWidth : valueWidth;
 
-                                // Rendering JSX for each feature
-                                return (
-                                  <div className="col mb-3 price-container" key={index} style={{ minWidth: columnWidth }}>
-                                    <div className="form-floating">
-                                      <input
-                                        type="text"
-                                        className="w-100 pt-3 px-3 price-input-field pe-none"
-                                        value={value}
-                                        readOnly
-                                      />
-                                      <p className="special-label">{label}</p>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
+    // Rendering JSX for each feature
+    return (
+      <div className="col mb-3 price-container" key={index} style={{ minWidth: columnWidth }}>
+        <div className="form-floating">
+          <input
+            type="text"
+            className="w-100 pt-3 px-3 price-input-field pe-none"
+            value={value}
+            readOnly
+          />
+          <p className="special-label">{label}</p>
+        </div>
+      </div>
+    );
+  })}
+</div>
 
                           </div>
                         </div>

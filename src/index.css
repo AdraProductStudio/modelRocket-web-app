@@ -121,8 +121,17 @@ code {
 }
 
 .fesibility-fontSize{
-  font-size: .75rem;
+  font-size: .8rem;
 }
 .imagePlaceholder{
   padding: 5.5rem 0;
+}
+
+.navLogo{
+  width: 4rem; 
+}
+
+.form-control:focus,.form-select:focus {
+  outline: 0;
+  box-shadow: none !important;
 }
