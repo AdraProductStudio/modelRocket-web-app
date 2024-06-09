@@ -120,5 +120,12 @@ code {
   font-weight: 500;
 }
 
-
-
+.fesibility-fontSize{
+  font-size: .75rem;
+}
+.imagePlaceholder{
+  padding: 5.5rem 0;
+}
+.navLogo{
+  width: 4rem; 
+}

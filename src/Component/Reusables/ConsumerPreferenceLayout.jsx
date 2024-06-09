@@ -3,6 +3,9 @@ import axiosInstance from "../../Services/axiosInstance";
 import toast from "react-hot-toast";
 
 const ConsumerPreferenceLayout = () => {
+  const [initialGlow,setInitialGlow]=useState(false);
+  const dummySlider=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+
   const [loading, setLoading] = useState(false);
   const [mainCriteriaPairs, setMainCriteriaPairs] = useState([]);
   const [sliderValues, setSliderValues] = useState([]);
@@ -13,6 +16,7 @@ const ConsumerPreferenceLayout = () => {
   const [productComparison, setProductComparison] = useState([]);
 
   useEffect(() => {
+    setInitialGlow(true);
     const get_attributes = async () => {
       const getProduct = {
         client_id: localStorage.getItem("client_id"),
@@ -21,6 +25,7 @@ const ConsumerPreferenceLayout = () => {
 
       try {
         await axiosInstance.post("/get_attributes", getProduct).then((res) => {
+          setInitialGlow(false);
           setRecommendedData(res.data.data[0]);
           setApiRequest(res.data.data[0]);
           setMainCriteriaPairs(res.data.data[0].main_criteria_pairs);
@@ -147,7 +152,7 @@ const ConsumerPreferenceLayout = () => {
 
   return (
     <>
-      <section className="content-breadcrumps-below-content-height content-preference-section pt-1 overflow-scroll">
+      <section className="content-breadcrumps-below-content-height content-preference-section pt-1 overflow-scroll placeholder-glow">
         <div className="container h-100">
           <div className="row h-100">
             {/* Left-side container */}
@@ -159,7 +164,27 @@ const ConsumerPreferenceLayout = () => {
                 </h4>
                 <div className="range-bar-container slidecontainer  px-4 ">
                   <>
-                    {mainCriteriaPairs &&
+                  { 
+                  initialGlow ? 
+                      dummySlider.map((v,i)=>{
+                        return  <div className="d-flex my-4 align-items-center" key={i}>
+                        <p className="p-2 mb-0 w-25 sliderText py-2 rounded-1 placeholder mx-4"></p>
+                        <div className="p-2 mb-0 flex-grow-1">
+                          <input
+                            type="range"
+                            className="form-control slider w-100 placeholder pe-none"
+                            min="1"
+                            max="9"
+                            step="5"
+                           
+                          />
+                        </div>
+                        <p className="p-2 mb-0 w-25 sliderText py-2 rounded-1 placeholder mx-4"> </p>
+                      </div>
+                      })
+                     
+                    :
+                    mainCriteriaPairs &&
                       mainCriteriaPairs.map((pair, index) => {
                         const key = `slider-${index}`; // Unique key for each slider
                         return (
@@ -189,7 +214,8 @@ const ConsumerPreferenceLayout = () => {
                             </p>
                           </div>
                         );
-                      })}
+                      })
+                  }
                   </>
                 </div>
 

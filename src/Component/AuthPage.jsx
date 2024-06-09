@@ -20,6 +20,11 @@ const AuthPage = () => {
         </li>
       )
     })
+
+    const removeLocalStorage = () => {
+      localStorage.removeItem("client_id")
+      localStorage.removeItem("product_category_id")
+    }
   return (
     <div className="vh-100">
     <Navbar/>
@@ -35,7 +40,7 @@ const AuthPage = () => {
                 <nav  aria-label="breadcrumb">
                 <ol className="breadcrumb bg-light p-2 rounded-1 mb-0">
                     <li className="breadcrumb-item">
-                        <Link to={"/"} className='text-decoration-none text-dark link-fontWeight'>Home</Link>
+                        <Link to={"/"} className='text-decoration-none text-dark link-fontWeight' onClick={removeLocalStorage}>Home</Link>
                     </li>
                     {crumbs}
                 </ol>

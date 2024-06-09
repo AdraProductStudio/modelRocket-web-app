@@ -1,8 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./Component/Home";
 import AuthPage from "./Component/AuthPage";
-import JewelryCategory from "./Component/JewelryCategory";
-import HvacCategory from "./Component/HvacCategory";
 import ConsumerPreferenceLayout from "./Component/Reusables/ConsumerPreferenceLayout";
 import Category from "./Component/Reusables/Category";
 import { Toaster } from "react-hot-toast";
