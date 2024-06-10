@@ -4,7 +4,7 @@ import { GiGemPendant } from "react-icons/gi";
 import { GiDiamondRing } from "react-icons/gi";
 import { GiHeartEarrings } from "react-icons/gi";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../../Services/axiosInstance"; 
+import axiosInstance from "../../Services/axiosInstance";
 
 const Category = () => {
   const pageRender = useNavigate();
@@ -35,7 +35,7 @@ const Category = () => {
     },
   ];
 
-  const [initialGlow, setInitialGlow] = useState(false);  
+  const [initialGlow, setInitialGlow] = useState(false);
   const [isFesabilityAvailable, setIsFesabilityAvailable] = useState(false);
   const [zipCode, setZipCode] = useState("");
 
@@ -46,15 +46,16 @@ const Category = () => {
   const [zipCodeErr, setZipCodeErr] = useState(false);
   const [sqfoootageErr, setSqfoootageErr] = useState(false);
   const [selectBoxErr, setSelectBoxErr] = useState(false);
-  const [feasibilityData,setFeasibilityData] = useState([]);
+  const [feasibilityData, setFeasibilityData] = useState([]);
 
   const [codes, setCodes] = useState([]);
   const [sqFootageLimit, setSqFootageLimit] = useState("");
-  const [selectBoxArray, setSelectBoxArray] = useState([]); 
+  const [selectBoxArray, setSelectBoxArray] = useState([]);
+  const [submitData, setSubmitData] = useState(false)
 
   const dummyCard = [1, 2, 3, 4]
 
-  const randomColor = () => { 
+  const randomColor = () => {
     var rand = Math.floor(Math.random() * 4);
     return category[rand];
   };
@@ -69,7 +70,7 @@ const Category = () => {
       try {
         await axiosInstance
           .post("/get_product_categories", getProduct)
-          .then((res) => { 
+          .then((res) => {
             setInitialGlow(false);
             setProductCategory(res.data.data);
           });
@@ -80,21 +81,21 @@ const Category = () => {
     };
 
     if (localStorage.getItem("client_id") !== null) {
-      fetchClientProduct(); 
+      fetchClientProduct();
     }
 
     fetchClientProduct();
   }, []);
 
-  const redirectConsumerPreferencePage = async (id,feasibilityArray) => {
-    if(feasibilityArray.length > 0){
+  const redirectConsumerPreferencePage = async (id, feasibilityArray) => {
+    if (feasibilityArray.length > 0) {
       setFeasibilityData(feasibilityArray)
       setCodes(feasibilityArray[0].bountary_value);
       setSqFootageLimit(parseInt(feasibilityArray[1].bountary_value[0]));
       setSelectBoxArray(feasibilityArray[2].question_value);
 
       localStorage.setItem("product_category_id", id)
-    }else{
+    } else {
       localStorage.setItem("product_category_id", id)
       pageRender("consumer_preference")
     }
@@ -132,34 +133,34 @@ const Category = () => {
 
   }
 
-  const handleFocus = (e) => {
-    var a = codes.includes(zipCode);
+  // const handleFocus = (e) => {
+  //   var a = codes.includes(zipCode);
 
-    if (e.target.name === "zipcode") {
-      if (a) {
-        setZipCodeErr(false);
-      } else {
-        setZipCodeErr(true);
-      }
-    } else if (e.target.name === "sqFootage") {
-      console.log(squareFootage >= 0 && squareFootage < sqFootageLimit && squareFootage !== "")
-      if (squareFootage >= 0 && squareFootage < sqFootageLimit && squareFootage !== "") {
-        setSqfoootageErr(false)
-      } else {
-        setSqfoootageErr(true)
-      }
-    } else {
-      if (selectBox !== "") {
-        setSelectBoxErr(false);
-      } else {
-        setSelectBoxErr(true);
-      }
-    }
-  }
+  //   if (e.target.name === "zipcode") {
+  //     if (a) {
+  //       setZipCodeErr(false);
+  //     } else {
+  //       setZipCodeErr(true);
+  //     }
+  //   } else if (e.target.name === "sqFootage") {
+  //     console.log(squareFootage >= 0 && squareFootage < sqFootageLimit && squareFootage !== "")
+  //     if (squareFootage >= 0 && squareFootage < sqFootageLimit && squareFootage !== "") {
+  //       setSqfoootageErr(false)
+  //     } else {
+  //       setSqfoootageErr(true)
+  //     }
+  //   } else {
+  //     if (selectBox !== "") {
+  //       setSelectBoxErr(false);
+  //     } else {
+  //       setSelectBoxErr(true);
+  //     }
+  //   }
+  // }
 
   const handleRedirect = () => {
-    console.log(squareFootage)
-    if (codes.includes(zipCode) && squareFootage >= 0 && squareFootage < sqFootageLimit && squareFootage!=="" && selectBox !== "") {
+    setSubmitData(true);
+    if (codes.includes(zipCode) && squareFootage >= 0 && squareFootage < sqFootageLimit && squareFootage !== "" && selectBox !== "") {
       document.getElementById("dismissModal").click();
       pageRender("consumer_preference");
     } else {
@@ -226,13 +227,14 @@ const Category = () => {
                         <div
                           className="col-12 col-sm-6 col-lg-3" key={i}
                           onClick={() => {
-                            redirectConsumerPreferencePage(v.id,v.feasibility);
+                            redirectConsumerPreferencePage(v.id, v.feasibility);
                             setZipCodeErr(false);
                             setSqfoootageErr(false);
                             setSelectBoxErr(false);
                             setZipCode("");
                             setsquareFootage("");
                             setSelectBox("");
+                            setSubmitData(false);
                           }}
                           data-bs-toggle={v.feasibility.length > 0 ? "modal" : ""}
                           data-bs-target={v.feasibility.length > 0 ? "#feasibilityModal" : ""}
@@ -268,90 +270,102 @@ const Category = () => {
       </div>
 
       <div className="modal fade" id="feasibilityModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content">
-          <div className="modal-header">
-            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"
 
-            ></button>
-          </div>
-          <div className="modal-body">
-            <div className="row">
-              <div className="col-12 d-flex flex-wrap align-items-center mb-3">
-                <div className="col-7 ">
-                  <p className="fesibility-fontSize text-break mb-0">1. {feasibilityData.length > 0 ? feasibilityData[0].question : ""}</p>
-                </div>
-                <div className="col-5">
-                  <input type="text" value={zipCode} 
-                      className={`${codes.includes(zipCode) ? 
-                            zipCodeErr ? "" : "border-success border-2"
-                            :
-                            zipCodeErr ? "border-danger border-2" : ""
-                        } w-100 form-control`} 
-                        maxLength="6" onChange={handleInput} name="zipcode" onBlur={handleFocus} />
-
-                  {codes.includes(zipCode) ? null : zipCodeErr ? <span className="fesibility-fontSize text-danger">Invalid Zip code</span> : null}
-                </div>
-              </div>
-
-
-              <div className="col-12 d-flex flex-wrap align-items-center mb-3">
-                <div className="col-7">
-                  <p className="fesibility-fontSize text-break mb-0">2. {feasibilityData.length > 0 ? feasibilityData[1].question : ""}</p>
-                </div>
-                <div className="col-5">
-                  <input type="text" value={squareFootage}
-                    className={`${squareFootage >= 0 && squareFootage < sqFootageLimit && squareFootage !== "" ?
-                      sqfoootageErr ? "" : "border-success border-2"
-                      : sqfoootageErr ? "border-danger border-2" : ""
-                      } w-100 form-control`
-                    } maxLength="3" onChange={handleInput} name="sqFootage" onBlur={handleFocus} />
-
-
-                  {squareFootage >= 0 && squareFootage < sqFootageLimit && squareFootage !== "" ?
-                    null
-                    :
-                    sqfoootageErr ? <span className="fesibility-fontSize text-danger">Invalid square footage</span> : null 
-                  }
-                  
-                </div>
-              </div>
-              <div className="col-12 d-flex flex-wrap align-items-center mb-3">
-                <div className="col-7 ">
-                  <p className="fesibility-fontSize text-break mb-0">3. {feasibilityData.length > 0 ? feasibilityData[2].question : ""}</p>
-                </div>
-                <div className="col-5">
-                  <select
-                    className={`${selectBox !== "" ?
-                      selectBoxErr ? "" : "border-success border-2"
-                      : selectBoxErr ? "border-danger border-2" : ""
-                      } form-select`
-                    }
-                    value={selectBox}
-                    aria-label="Default select example" name="selectbox" onChange={handleInput} onBlur={handleFocus}>
-                    <option value="">select</option>
-                    {
-                      selectBoxArray.map((v, i) => {
-                        return <option value={v} key={i}>{v}</option>
-                      })
-                    }
-                  </select>
-                  {selectBox!=="" ? null : selectBoxErr ? <span className="fesibility-fontSize text-danger">Field not selected</span> : null}
-                </div>
-              </div>
+              ></button>
             </div>
-          </div>
-          <div className="modal-footer">
-            <div className="col-6 m-0 px-1">
-              <button type="button" className="btn btn-transparent border w-100" data-bs-dismiss="modal" id="dismissModal"
-              >Close</button>
+            <div className="modal-body">
+              <div className="row">
+                <div className="col-12 d-flex flex-wrap align-items-center mb-3">
+                  <div className="col-7 ">
+                    <p className="fesibility-fontSize text-break mb-0">1. {feasibilityData.length > 0 ? feasibilityData[0].question : ""}</p>
+                  </div>
+                  <div className="col-5">
+                    <input type="text" value={zipCode}
+                      className={`${submitData ?
+                        codes.includes(zipCode) ?
+                          zipCodeErr ? "" : "border-success border-2"
+                          :
+                          zipCodeErr ? "border-danger border-2" : ""
+                        : null
+                        } w-100 form-control`}
+                      maxLength="6" onChange={handleInput} name="zipcode" />
+
+                    {codes.includes(zipCode) ? null : zipCodeErr ? <span className="fesibility-fontSize text-danger">Required field</span> : null}
+                  </div>
+                </div>
+
+
+                <div className="col-12 d-flex flex-wrap align-items-center mb-3">
+                  <div className="col-7">
+                    <p className="fesibility-fontSize text-break mb-0">2. {feasibilityData.length > 0 ? feasibilityData[1].question : ""}</p>
+                  </div>
+                  <div className="col-5">
+                    <input type="text" value={squareFootage}
+                      className={`${submitData ?
+                        squareFootage >= 0 && squareFootage < sqFootageLimit && squareFootage !== "" ?
+                          sqfoootageErr ? "" : "border-success border-2"
+                          : sqfoootageErr ? "border-danger border-2" : ""
+                        : null} w-100 form-control`
+                      } maxLength="3" onChange={handleInput} name="sqFootage" />
+
+
+                    {squareFootage >= 0 && squareFootage < sqFootageLimit && squareFootage !== "" ?
+                      null
+                      :
+                      sqfoootageErr ? <span className="fesibility-fontSize text-danger">Required field</span> : null
+                    }
+
+                  </div>
+                </div>
+                <div className="col-12 d-flex flex-wrap align-items-center mb-3">
+                  <div className="col-7 ">
+                    <p className="fesibility-fontSize text-break mb-0">3. {feasibilityData.length > 0 ? feasibilityData[2].question : ""}</p>
+                  </div>
+                  <div className="col-5">
+                    <select
+                      className={`${submitData ?
+                        selectBox !== "" ?
+                          selectBoxErr ? "" : "border-success border-2"
+                          : selectBoxErr ? "border-danger border-2" : ""
+                        : null} form-select`
+                      }
+                      value={selectBox}
+                      aria-label="Default select example" name="selectbox" onChange={handleInput}>
+                      <option value="">select</option>
+                      {
+                        selectBoxArray.map((v, i) => {
+                          return <option value={v} key={i}>{v}</option>
+                        })
+                      }
+                    </select>
+                    {selectBox !== "" ? null : selectBoxErr ? <span className="fesibility-fontSize text-danger">Required field</span> : null}
+                  </div>
+                </div>
+              </div>
+              {
+                selectBoxErr || sqfoootageErr || zipCodeErr ?
+                  <div class="alert alert-danger fesibility-fontSize" role="alert">
+                    Sorry! We don’t have any products/services that match your requirements
+                  </div>
+                  :
+                  null
+              }
             </div>
-            <div className="col-6 m-0 px-1">
-              <button type="button" className="btn btn-primary w-100" onClick={handleRedirect}>Next</button>
+            <div className="modal-footer">
+              <div className="col-6 m-0 px-1">
+                <button type="button" className="btn btn-transparent border w-100" data-bs-dismiss="modal" id="dismissModal"
+                >Close</button>
+              </div>
+              <div className="col-6 m-0 px-1">
+                <button type="button" className="btn btn-primary w-100" onClick={handleRedirect}>Next</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </div>
     </>
   );
