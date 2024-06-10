@@ -36,7 +36,6 @@ const Category = () => {
   ];
 
   const [initialGlow, setInitialGlow] = useState(false);
-  const [isFesabilityAvailable, setIsFesabilityAvailable] = useState(false);
   const [zipCode, setZipCode] = useState("");
 
   const [squareFootage, setsquareFootage] = useState("");
@@ -51,7 +50,8 @@ const Category = () => {
   const [codes, setCodes] = useState([]);
   const [sqFootageLimit, setSqFootageLimit] = useState("");
   const [selectBoxArray, setSelectBoxArray] = useState([]);
-  const [submitData, setSubmitData] = useState(false)
+  const [submitData, setSubmitData] = useState(false);
+  const [noDataFound,setNoDataFound] = useState(false);
 
   const dummyCard = [1, 2, 3, 4]
 
@@ -71,6 +71,7 @@ const Category = () => {
         await axiosInstance
           .post("/get_product_categories", getProduct)
           .then((res) => {
+            console.log(res)
             setInitialGlow(false);
             setProductCategory(res.data.data);
           });
@@ -133,59 +134,59 @@ const Category = () => {
 
   }
 
-  // const handleFocus = (e) => {
-  //   var a = codes.includes(zipCode);
-
-  //   if (e.target.name === "zipcode") {
-  //     if (a) {
-  //       setZipCodeErr(false);
-  //     } else {
-  //       setZipCodeErr(true);
-  //     }
-  //   } else if (e.target.name === "sqFootage") {
-  //     console.log(squareFootage >= 0 && squareFootage < sqFootageLimit && squareFootage !== "")
-  //     if (squareFootage >= 0 && squareFootage < sqFootageLimit && squareFootage !== "") {
-  //       setSqfoootageErr(false)
-  //     } else {
-  //       setSqfoootageErr(true)
-  //     }
-  //   } else {
-  //     if (selectBox !== "") {
-  //       setSelectBoxErr(false);
-  //     } else {
-  //       setSelectBoxErr(true);
-  //     }
-  //   }
-  // }
-
   const handleRedirect = () => {
-    setSubmitData(true);
-    if (codes.includes(zipCode) && squareFootage >= 0 && squareFootage < sqFootageLimit && squareFootage !== "" && selectBox !== "") {
-      document.getElementById("dismissModal").click();
-      pageRender("consumer_preference");
+    var a = codes.includes(zipCode);
+    var b = squareFootage;
+
+    if (a) {
+      setZipCodeErr(false);
     } else {
-      var a = codes.includes(zipCode);
-      var b = squareFootage;
+      setZipCodeErr(true);
+    }
 
-      if (a) {
-        setZipCodeErr(false);
-      } else {
-        setZipCodeErr(true);
-      }
+    if (b >= 0 && b < sqFootageLimit && b !== "") {
+      setSqfoootageErr(false)
+    } else {
+      setSqfoootageErr(true)
+    }
 
-      if (b >= 0 && b < sqFootageLimit && b !== "") {
-        setSqfoootageErr(false)
-      } else {
-        setSqfoootageErr(true)
-      }
+    if (selectBox !== "") {
+      setSelectBoxErr(false);
+    } else {
+      setSelectBoxErr(true);
+    }
+    setSubmitData(true);
 
-      if (selectBox !== "") {
-        setSelectBoxErr(false);
-      } else {
-        setSelectBoxErr(true);
+    if (zipCode!=="" && squareFootage !== ""  && squareFootage !== "") {
+      if((feasibilityData[2].bountary_value[0]===selectBox && squareFootage < sqFootageLimit) && (feasibilityData[2].bountary_value[0]===selectBox && codes.includes(zipCode)) ){
+        setNoDataFound(false);
+        document.getElementById("dismissModal").click();
+        pageRender("consumer_preference");
+      }else{
+        console.log("2")
+        if(feasibilityData[2].bountary_value[0]!==selectBox && a && b >= 0 && b < sqFootageLimit){
+          setNoDataFound(true);
+        }else{
+          setNoDataFound(false);
+        }
       }
+    }else{
+      setNoDataFound(false);
     }
   }
+
+  const handleResetAll= () =>{
+    setZipCodeErr(false);
+    setSqfoootageErr(false);
+    setSelectBoxErr(false);
+    setZipCode("");
+    setsquareFootage("");
+    setSelectBox("");
+    setSubmitData(false);
+    setNoDataFound(false);
+  }
+
+
 
   return (
     <>
@@ -226,15 +227,9 @@ const Category = () => {
                       return (
                         <div
                           className="col-12 col-sm-6 col-lg-3" key={i}
-                          onClick={() => {
+                          onClick={()=>{
                             redirectConsumerPreferencePage(v.id, v.feasibility);
-                            setZipCodeErr(false);
-                            setSqfoootageErr(false);
-                            setSelectBoxErr(false);
-                            setZipCode("");
-                            setsquareFootage("");
-                            setSelectBox("");
-                            setSubmitData(false);
+                            handleResetAll();
                           }}
                           data-bs-toggle={v.feasibility.length > 0 ? "modal" : ""}
                           data-bs-target={v.feasibility.length > 0 ? "#feasibilityModal" : ""}
@@ -292,9 +287,9 @@ const Category = () => {
                           zipCodeErr ? "border-danger border-2" : ""
                         : null
                         } w-100 form-control`}
-                      maxLength="6" onChange={handleInput} name="zipcode" />
+                       onChange={handleInput} name="zipcode" />
 
-                    {codes.includes(zipCode) ? null : zipCodeErr ? <span className="fesibility-fontSize text-danger">Required field</span> : null}
+                    {zipCode==="" && zipCodeErr ? <span className="fesibility-fontSize text-danger">Required field</span> : null}
                   </div>
                 </div>
 
@@ -310,13 +305,11 @@ const Category = () => {
                           sqfoootageErr ? "" : "border-success border-2"
                           : sqfoootageErr ? "border-danger border-2" : ""
                         : null} w-100 form-control`
-                      } maxLength="3" onChange={handleInput} name="sqFootage" />
+                      }  onChange={handleInput} name="sqFootage" />
 
 
-                    {squareFootage >= 0 && squareFootage < sqFootageLimit && squareFootage !== "" ?
-                      null
-                      :
-                      sqfoootageErr ? <span className="fesibility-fontSize text-danger">Required field</span> : null
+                    {
+                      sqfoootageErr && squareFootage === "" ? <span className="fesibility-fontSize text-danger">Required field</span> : null
                     }
 
                   </div>
@@ -342,13 +335,13 @@ const Category = () => {
                         })
                       }
                     </select>
-                    {selectBox !== "" ? null : selectBoxErr ? <span className="fesibility-fontSize text-danger">Required field</span> : null}
+                    {selectBox === "" && selectBoxErr ? <span className="fesibility-fontSize text-danger">Required field</span> : null}
                   </div>
                 </div>
               </div>
               {
-                selectBoxErr || sqfoootageErr || zipCodeErr ?
-                  <div class="alert alert-danger fesibility-fontSize" role="alert">
+                noDataFound ?
+                  <div class="alert alert-primary fesibility-fontSize fw-bold" role="alert">
                     Sorry! We don’t have any products/services that match your requirements
                   </div>
                   :

@@ -62,7 +62,7 @@ const Home = () => {
 
 
       ref.current.value = "";
-      if(res.data.error_code===0){
+      if(res.data.error_code===200){
         setUpdateClientStatus(!updateClientStatus)
       }else{
         toast.error(res.data.message)
