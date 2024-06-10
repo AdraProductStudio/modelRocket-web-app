@@ -138,13 +138,15 @@ const Category = () => {
     var a = codes.includes(zipCode);
     var b = squareFootage;
 
+    var c=feasibilityData[1].bountary_type==="<" ? squareFootage>=0 && squareFootage < sqFootageLimit : squareFootage >= sqFootageLimit
+
     if (a) {
       setZipCodeErr(false);
     } else {
       setZipCodeErr(true);
     }
 
-    if (b >= 0 && b < sqFootageLimit && b !== "") {
+    if (c && b !== "") {
       setSqfoootageErr(false)
     } else {
       setSqfoootageErr(true)
@@ -157,18 +159,18 @@ const Category = () => {
     }
     setSubmitData(true);
 
-    if (zipCode!=="" && squareFootage !== ""  && squareFootage !== "") {
-      if((feasibilityData[2].bountary_value[0]===selectBox && squareFootage < sqFootageLimit) && (feasibilityData[2].bountary_value[0]===selectBox && codes.includes(zipCode)) ){
+    if (zipCode!=="" && squareFootage !== ""  && selectBox !== "") {
+      if((feasibilityData[2].bountary_value[0]===selectBox && feasibilityData[1].bountary_type==="<" ? squareFootage < sqFootageLimit : squareFootage >= sqFootageLimit) && (feasibilityData[2].bountary_value[0]===selectBox && codes.includes(zipCode)) ){
         setNoDataFound(false);
         document.getElementById("dismissModal").click();
         pageRender("consumer_preference");
       }else{
-        console.log("2")
-        if(feasibilityData[2].bountary_value[0]!==selectBox && a && b >= 0 && b < sqFootageLimit){
-          setNoDataFound(true);
-        }else{
-          setNoDataFound(false);
-        }
+        // if(feasibilityData[2].bountary_value[0]!==selectBox  && a && b >= 0 && b < sqFootageLimit){
+        //   setNoDataFound(true);
+        // }else{
+        //   setNoDataFound(false);
+        // }
+        setNoDataFound(true);
       }
     }else{
       setNoDataFound(false);
@@ -301,7 +303,7 @@ const Category = () => {
                   <div className="col-5">
                     <input type="text" value={squareFootage}
                       className={`${submitData ?
-                        squareFootage >= 0 && squareFootage < sqFootageLimit && squareFootage !== "" ?
+                        feasibilityData[1].bountary_type==="<" ? squareFootage>=0 && squareFootage < sqFootageLimit : squareFootage >= sqFootageLimit && squareFootage !== "" ?
                           sqfoootageErr ? "" : "border-success border-2"
                           : sqfoootageErr ? "border-danger border-2" : ""
                         : null} w-100 form-control`
