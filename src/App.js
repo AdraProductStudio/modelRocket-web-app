@@ -4,6 +4,7 @@ import AuthPage from "./Component/AuthPage";
 import ConsumerPreferenceLayout from "./Component/Reusables/ConsumerPreferenceLayout";
 import Category from "./Component/Reusables/Category";
 import { Toaster } from "react-hot-toast";
+import ProductCategory from "./Component/Reusables/ProductCategory";
 
 function App() {
   return (
@@ -14,7 +15,7 @@ function App() {
           <Route index exact element={<Home />} />
 
           <Route path="category">
-            <Route index exact element={<Category />} />
+            <Route index exact element={<ProductCategory />} />
             <Route
               path="consumer_preference"
               exact

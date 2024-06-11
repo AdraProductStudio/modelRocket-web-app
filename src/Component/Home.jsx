@@ -80,11 +80,11 @@ const Home = () => {
 
       <div className="row g-3 pt-4 align-content-stretch">
         <div className="col-12 d-inline-flex justify-content-end">
-          <div className="col-12 col-sm-6 col-md-3">
+          {/* <div className="col-12 col-sm-6 col-md-3">
             <div class="mb-3">
               <input class="form-control" ref={ref} type="file" accept=".xls,.xlsx" onChange={handleUploadXlsheet} />
             </div>
-          </div>
+          </div> */}
         </div>
         {
           initialGlow ?

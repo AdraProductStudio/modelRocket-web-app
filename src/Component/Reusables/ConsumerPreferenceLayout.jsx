@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../../Services/axiosInstance";
 import toast from "react-hot-toast";
+import { DataAnalysisGrapgh } from "./DataAnalysisGrapgh";
 
 const ConsumerPreferenceLayout = () => {
   const [initialGlow, setInitialGlow] = useState(false);
@@ -52,26 +53,7 @@ const ConsumerPreferenceLayout = () => {
 
   const convertSliderValue = (value) => {
     switch (value) {
-      // case 1:
-      //   return 1 / 5;
-      // case 2:
-      //   return 1 / 4;
-      // case 3:
-      //   return 1 / 3;
-      // case 4:
-      //   return 1 / 2;
-      // case 5:
-      //   return 1;
-      // case 6:
-      //   return 2;
-      // case 7:
-      //   return 3;
-      // case 8:
-      //   return 4;
-      // case 9:
-      //   return 5;
-      // default:
-      //   return 1; // Default to 1 if value is out of range
+    
 
       case 1:
         return 5;
@@ -96,14 +78,7 @@ const ConsumerPreferenceLayout = () => {
     }
   };
 
-  const updateApiRequest = () => {
-    const updatedApiRequest = {
-      ...apiRequest,
-      user_importance: sliderValues.map(convertSliderValue),
-    };
-    console.log("Updated API Request:", updatedApiRequest); // Add this line
-    setApiRequest(updatedApiRequest);
-  };
+  const [graphData, setGraphData] = useState({});
 
   const handleDone = async () => {
     // updateApiRequest(); // Update apiRequest with current slider values
@@ -127,6 +102,7 @@ const ConsumerPreferenceLayout = () => {
       if (response.data.error_code === 200) {
         setData(response.data); // Set your data state here
         setProductComparison(response.data.data.product_comparisons);
+        setGraphData(response.data.data.criteria_weights);
       } else {
         toast.error(response.data.message);
       }
@@ -137,38 +113,106 @@ const ConsumerPreferenceLayout = () => {
     }
   };
 
-  // const handleDone = async (e) => {
-  //   // Update apiRequest with current slider values
-  //   updateApiRequest();
-  //   const convertedValues = sliderValues.map((value) =>
-  //     convertSliderValue(value)
-  //   );
-  //   alert(convertedValues);
-
-  //   console.log(apiRequest)
-
-  //   try {
-  //     // Make API call with axios
-  //     const response = await axiosInstance.post("/consumer_service", apiRequest);
-
-  //     // Handle the response, for example, set the received data to the 'data' state
-
-  //     if(response.data.error_code === 200){
-  //       console.log(response.data);
-  //     }
-
-  //     setLoading(false);
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleSliderChange = (index, event) => {
     const newSliderValues = [...sliderValues];
     newSliderValues[index] = parseInt(event.target.value);
     setSliderValues(newSliderValues);
-    console.log("Slider Values Updated:", newSliderValues); // Add this line
+};
+
+  const [activeTab, setActiveTab] = useState("topRecommendations");
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "topRecommendations":
+        return (
+          <div className="top-recommendation-card-container px-4">
+            {productComparison.map((item, index) => (
+              <div className="card mb-3 p-0" key={index}>
+                <div className="row g-0">
+                  <div className="col-md-12">
+                    <div className="card-body mb-0">
+                      <h5 className="card-title fw-bold">{item.name}</h5>
+                      <p className="card-text">{item.desc}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="container-fluid my-3 mb-4">
+                  <div className="row mx-0">
+                    {/* Mapping non-quantified values into item.features */}
+                    {item["non-quantified-values"].map((feature, index) => {
+                      // Get the label and value from each feature object
+                      const label = Object.keys(feature)[0]; // Extracting the label
+                      const value = feature[label]; // Extracting the value
+
+                      // Calculate the width of the column dynamically based on the length of the label and value
+                      const labelWidth = `${(label.length + 2) * 10}px`; // Adjust the multiplier according to your font size and padding
+                      const valueWidth = `${(value.length + 5) * 10}px`; // Adjust the multiplier according to your font size and padding
+                      const columnWidth =
+                        label.length > value.length ? labelWidth : valueWidth;
+
+                      // Rendering JSX for each feature
+                      return (
+                        <div
+                          className="col mb-3 price-container"
+                          key={index}
+                          style={{ minWidth: columnWidth }}
+                        >
+                          <div className="form-floating">
+                            <input
+                              type="text"
+                              className="w-100 pt-3 px-3 price-input-field pe-none"
+                              value={value}
+                              readOnly
+                            />
+                            <p className="special-label">{label}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      case "consumerPreference":
+        return (
+          <div className="top-recommendation-card-container px-4">
+                        
+                <div className="card mb-3 p-0">
+                  <div className="row g-0">
+                    <div className="col-md-12">
+                      <div className="card-body mb-0">
+                        <DataAnalysisGrapgh graphData={graphData} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="container-fluid my-3 mb-4">
+                    <div className="row mx-0">
+                      {Object.keys(graphData).map((key, index) => (
+                        <div
+                          className="col mb-3 price-container"
+                          key={index}                          
+                        >
+                          <div className="form-floating">
+                            <input
+                              type="text"
+                              className="w-100 pt-3 px-3 price-input-field pe-none"
+                              value={graphData[key]*100}
+                              readOnly
+                            />
+                            <p className="special-label">{key} (%)</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>                         
+          </div>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
@@ -185,27 +229,30 @@ const ConsumerPreferenceLayout = () => {
                 </h4>
                 <div className="range-bar-container slidecontainer  px-4 ">
                   <>
-                    {
-                      initialGlow ?
-                        dummySlider.map((v, i) => {
-                          return <div className="d-flex my-4 align-items-center" key={i}>
-                            <p className="p-2 mb-0 w-25 sliderText py-2 rounded-1 placeholder mx-4"></p>
-                            <div className="p-2 mb-0 flex-grow-1">
-                              <input
-                                type="range"
-                                className="form-control slider w-100 placeholder pe-none"
-                                min="1"
-                                max="9"
-                                step="5"
-
-                              />
+                    {initialGlow
+                      ? dummySlider.map((v, i) => {
+                          return (
+                            <div
+                              className="d-flex my-4 align-items-center"
+                              key={i}
+                            >
+                              <p className="p-2 mb-0 w-25 sliderText py-2 rounded-1 placeholder mx-4"></p>
+                              <div className="p-2 mb-0 flex-grow-1">
+                                <input
+                                  type="range"
+                                  className="form-control slider w-100 placeholder pe-none"
+                                  min="1"
+                                  max="9"
+                                  step="5"
+                                />
+                              </div>
+                              <p className="p-2 mb-0 w-25 sliderText py-2 rounded-1 placeholder mx-4">
+                                {" "}
+                              </p>
                             </div>
-                            <p className="p-2 mb-0 w-25 sliderText py-2 rounded-1 placeholder mx-4"> </p>
-                          </div>
+                          );
                         })
-
-                        :
-                        mainCriteriaPairs &&
+                      : mainCriteriaPairs &&
                         mainCriteriaPairs.map((pair, index) => {
                           const key = `slider-${index}`; // Unique key for each slider
                           return (
@@ -235,8 +282,7 @@ const ConsumerPreferenceLayout = () => {
                               </p>
                             </div>
                           );
-                        })
-                    }
+                        })}
                   </>
                 </div>
 
@@ -264,57 +310,42 @@ const ConsumerPreferenceLayout = () => {
                     />
                   </div>
                 ) : productComparison.length ? (
-                  <div>
-                    <h4 className="title mb-1 pt-4 mb-3 px-4">
-                      Top Recommendations
-                    </h4>
-                    <div className="top-recommendation-card-container px-4">
-                      {productComparison.map((item, index) => (
-                        <div className="card mb-3 p-0" key={index}>
-                          <div className="row g-0">
-                            <div className="col-md-12">
-                              <div className="card-body mb-0">
-                                <h5 className="card-title fw-bold">
-                                  {item.name}
-                                </h5>
-                                <p className="card-text">{item.desc}</p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="container-fluid my-3 mb-4">
-                            <div className="row mx-0">
-                              {/* Mapping non-quantified values into item.features */}
-                              {item["non-quantified-values"].map((feature, index) => {
-                                // Get the label and value from each feature object
-                                const label = Object.keys(feature)[0]; // Extracting the label
-                                const value = feature[label]; // Extracting the value
-
-                                // Calculate the width of the column dynamically based on the length of the label and value
-                                const labelWidth = `${(label.length + 2) * 10}px`; // Adjust the multiplier according to your font size and padding
-                                const valueWidth = `${(value.length + 5) * 10}px`; // Adjust the multiplier according to your font size and padding
-                                const columnWidth = label.length > value.length ? labelWidth : valueWidth;
-
-                                // Rendering JSX for each feature
-                                return (
-                                  <div className="col mb-3 price-container" key={index} style={{ minWidth: columnWidth }}>
-                                    <div className="form-floating">
-                                      <input
-                                        type="text"
-                                        className="w-100 pt-3 px-3 price-input-field pe-none"
-                                        value={value}
-                                        readOnly
-                                      />
-                                      <p className="special-label">{label}</p>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="">
+                    <ul className="nav nav-tabs ">
+                      <li className="nav-item w-50 text-center">
+                        <a
+                          className={`nav-link title ${
+                            activeTab === "topRecommendations"
+                              ? "topRecommendations active"
+                              : ""
+                          }`}
+                          href="#topRecommendations"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setActiveTab("topRecommendations");
+                          }}
+                        >
+                          Top Recommendations
+                        </a>
+                      </li>
+                      <li className="nav-item w-50 text-center">
+                        <a
+                          className={`nav-link title ${
+                            activeTab === "consumerPreference"
+                              ? "consumerPreference active "
+                              : ""
+                          }`}
+                          href="#consumerPreference"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setActiveTab("consumerPreference");
+                          }}
+                        >
+                          Consumer Finger Print
+                        </a>
+                      </li>
+                    </ul>
+                    <div className="mt-3">{renderTabContent()}</div>
                   </div>
                 ) : (
                   <div className="d-flex justify-content-center align-items-center h-100">
@@ -335,3 +366,53 @@ const ConsumerPreferenceLayout = () => {
 };
 
 export default ConsumerPreferenceLayout;
+// {productComparison.map((item, index) => (
+//   <div className="card mb-3 p-0" key={index}>
+//     <div className="row g-0">
+//       <div className="col-md-12">
+//         <div className="card-body mb-0">
+//           {/* <h5 className="card-title fw-bold">
+//           {item.name}
+//         </h5>
+//         <p className="card-text">{item.desc}</p> */}
+//         <DataAnalysisGrapgh graphData={graphData}/>
+//         </div>
+//       </div>
+//     </div>
+//     <div className="container-fluid my-3 mb-4">
+//       <div className="row mx-0">
+//         {/* Mapping non-quantified values into item.features */}
+//         {item["non-quantified-values"].map((feature, index) => {
+//           // Get the label and value from each feature object
+//           const label = Object.keys(feature)[0]; // Extracting the label
+//           const value = feature[label]; // Extracting the value
+
+//           // Calculate the width of the column dynamically based on the length of the label and value
+//           const labelWidth = `${(label.length + 2) * 10}px`; // Adjust the multiplier according to your font size and padding
+//           const valueWidth = `${(value.length + 5) * 10}px`; // Adjust the multiplier according to your font size and padding
+//           const columnWidth =
+//             label.length > value.length ? labelWidth : valueWidth;
+
+//           // Rendering JSX for each feature
+//           return (
+//             <div
+//               className="col mb-3 price-container"
+//               key={index}
+//               style={{ minWidth: columnWidth }}
+//             >
+//               <div className="form-floating">
+//                 <input
+//                   type="text"
+//                   className="w-100 pt-3 px-3 price-input-field pe-none"
+//                   value={value}
+//                   readOnly
+//                 />
+//                 <p className="special-label">{label}</p>
+//               </div>
+//             </div>
+//           );
+//         })}
+//       </div>
+//     </div>
+//   </div>
+// ))}
