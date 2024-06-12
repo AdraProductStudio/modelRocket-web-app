@@ -57,8 +57,7 @@ const Home = () => {
         headers: {
           "content-type": "multipart/form-data",
         }
-      })
-      console.log(res);
+      })      
 
 
       ref.current.value = "";

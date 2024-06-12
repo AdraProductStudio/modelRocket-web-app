@@ -88,7 +88,7 @@ const ConsumerPreferenceLayout = () => {
       user_importance: sliderValues.map(convertSliderValue),
     };
 
-    console.log(updatedApiRequest);
+    
 
     try {
       setLoading(true);
@@ -98,7 +98,7 @@ const ConsumerPreferenceLayout = () => {
         "/consumer_service",
         updatedApiRequest
       );
-      console.log(response.data);
+      
       if (response.data.error_code === 200) {
         setData(response.data); // Set your data state here
         setProductComparison(response.data.data.product_comparisons);
@@ -198,7 +198,7 @@ const ConsumerPreferenceLayout = () => {
                             <input
                               type="text"
                               className="w-100 pt-3 px-3 price-input-field pe-none"
-                              value={graphData[key]*100}
+                              value={graphData[key].toFixed(2)*100}
                               readOnly
                             />
                             <p className="special-label">{key} (%)</p>

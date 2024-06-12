@@ -2,7 +2,6 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./Component/Home";
 import AuthPage from "./Component/AuthPage";
 import ConsumerPreferenceLayout from "./Component/Reusables/ConsumerPreferenceLayout";
-import Category from "./Component/Reusables/Category";
 import { Toaster } from "react-hot-toast";
 import ProductCategory from "./Component/Reusables/ProductCategory";
 

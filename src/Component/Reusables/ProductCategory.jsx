@@ -28,19 +28,20 @@ const ProductCategory = () => {
   const [initialGlow, setInitialGlow] = useState(false);
   const [productCategory, setProductCategory] = useState([]);
   const [feasibilityData, setFeasibilityData] = useState([]);
-  const [noDataFound, setNoDataFound] = useState(false);  
+  const [noDataFound, setNoDataFound] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const [fieldValues, setFieldValues] = useState(Array(feasibilityData.length).fill(''));
+  const [fieldValues, setFieldValues] = useState(
+    Array(feasibilityData.length).fill("")
+  );
 
   const handleFieldChange = (index, value) => {
-    setFieldValues(prevFieldValues => {
+    setFieldValues((prevFieldValues) => {
       const newFieldValues = [...prevFieldValues];
       newFieldValues[index] = value;
       return newFieldValues;
     });
   };
-  
-
 
   const dummyCard = [1, 2, 3, 4];
 
@@ -59,8 +60,7 @@ const ProductCategory = () => {
       const res = await axiosInstance.post(
         "/get_product_categories",
         getProduct
-      );
-      console.log(res.data);
+      );      
       setInitialGlow(false);
       setProductCategory(res.data.data);
     } catch (err) {
@@ -73,8 +73,7 @@ const ProductCategory = () => {
       fetchClientProduct();
     }
 
-    setFieldValues(Array(feasibilityData.length).fill(''));
-
+    setFieldValues(Array(feasibilityData.length).fill(""));
   }, [feasibilityData]);
 
   const redirectConsumerPreferencePage = async (id, feasibilityArray) => {
@@ -87,96 +86,125 @@ const ProductCategory = () => {
     }
   };
 
-  // const handleRedirect = () => {
-    
-  //   if (fieldValues.length === 0) {
-  //     alert("Please fill in all fields."); 
-  //     return;
-  //   } else {
-  //     const invalidFields = feasibilityData.filter((v, i) => {
-  //       const inputValue = fieldValues[i]; 
-  
-  //       const boundaryType = v.bountary_type;
-  //       const boundaryValue = v.bountary_value;
-  //       switch (boundaryType) {
-  //         case "in":
-  //           return !boundaryValue.includes(inputValue);
-  //         case ">":
-  //           return parseInt(inputValue) < parseInt(boundaryValue);
-  //         case "<":
-  //           return parseInt(inputValue) > parseInt(boundaryValue);
-  //         case "value":
-  //           return inputValue !== boundaryValue[0];
-  //         default:
-  //           return false;
-  //       }
-  //     });
-  
-  //     if (invalidFields.length > 0) {  
-  //       alert("Some fields have invalid values."); 
-  //       setNoDataFound(true);
-  //       return;
-  //     } else {
-  //       document.getElementById("dismissModal").click();
-  //       pageRender("consumer_preference");
-  //     }
-  //   }
-  // };
-  
 
   const handleRedirect = () => {
-    // Check if any individual input value is empty
+    let isEmpty = false;
+    let isNotSatisfied = false;
+    let noneSatisfied = true; // Flag to track if none of the conditions are satisfied
 
+    
 
-    console.log("Field values:", fieldValues);
+    // Check if any required field is empty
+    fieldValues.forEach((value, i) => {
 
-    const isAnyFieldEmpty = fieldValues.some(value => value === '');
-
-    console.log("Are any fields empty?", isAnyFieldEmpty);
-  
-    if (isAnyFieldEmpty) {
-      alert("Please fill in all fields.");
-      return;
-    } else {
-      const invalidFields = feasibilityData.filter((v, i) => {
-        const inputValue = fieldValues[i]; 
-  
-        const boundaryType = v.bountary_type;
-        const boundaryValue = v.bountary_value;
-        switch (boundaryType) {
-          case "in":
-            return !boundaryValue.includes(inputValue);
-          case ">":
-            return parseInt(inputValue) < parseInt(boundaryValue);
-          case "<":
-            return parseInt(inputValue) > parseInt(boundaryValue);
-          case "value":
-            return inputValue !== boundaryValue[0];
-          default:
-            return false;
-        }
-      });
-  
-      if (invalidFields.length > 0) {  
-        alert("Some fields have invalid values."); 
-        setNoDataFound(true);
-        return;
+      const inputElement = document.getElementById(`input-${i}`);
+      if (value === "") {
+        inputElement.style.borderColor = "red";
+        isEmpty = true;
+        
       } else {
-        document.getElementById("dismissModal").click();
-        pageRender("consumer_preference");
+        {
+          setErrorMessage("") 
+
+          let isError = false;
+
+          feasibilityData.forEach((v, i) => {
+            const inputValue = fieldValues[i];
+            const boundaryType = v.bountary_type;
+            const boundaryValue = v.bountary_value;
+            const inputElement = document.getElementById(`input-${i}`);
+
+            // Reset isNotSatisfied for each iteration
+            isNotSatisfied = false;
+
+            switch (boundaryType) {
+              case "in":
+                if (!boundaryValue.includes(inputValue)) {
+                  inputElement.style.borderColor = "red";
+                  isError = true;
+                  isNotSatisfied = true;
+                } else {
+                  inputElement.style.borderColor = "green";
+                }
+                break;
+              case ">":
+                if (
+                  isNaN(parseFloat(inputValue)) ||
+                  parseFloat(inputValue) <= parseFloat(boundaryValue)
+                ) {
+                  inputElement.style.borderColor = "red";
+                  isError = true;
+                  isNotSatisfied = true;
+                } else {
+                 
+                  inputElement.style.borderColor = "green";
+                }
+                break;
+              case "<":
+                if (
+                  isNaN(parseFloat(inputValue)) ||
+                  parseFloat(inputValue) >= parseFloat(boundaryValue)
+                ) {
+                  inputElement.style.borderColor = "red";
+                  isError = true;
+                  isNotSatisfied = true;
+                } else {
+                 
+                  inputElement.style.borderColor = "green";
+                }
+                break;
+              case "value":                
+                if (inputValue !== boundaryValue[0]) {
+                  inputElement.style.borderColor = "red";
+                  isError = true;
+                  isNotSatisfied = true;
+                } else {                  
+                  inputElement.style.borderColor = "green";
+                }
+                break;
+              default:
+                break;
+            }
+                                                          
+          });
+
+          
+
+            if (isNotSatisfied) {
+              noneSatisfied = false;
+            }
+
+          
+
+
+          if (!isError) {
+            document.getElementById("dismissModal").click();
+            pageRender("consumer_preference");
+          }
+        }
       }
+    });
+
+    // If any required field is empty, show error message and return
+    if (isEmpty) {
+      setErrorMessage("Please fill in all required fields.");
+      return;
+    }
+
+    if (noneSatisfied) {
+      setNoDataFound(true);
+      // Alternatively, you can trigger another action or set another flag here
     }
   };
+
   
-  
+
   const handleResetAll = () => {
     if (ref.current) {
       ref.current.value = "";
     }
   };
 
- 
-  
   const dynamicInputFields = (v, i) => {
     switch (v.bountary_type) {
       case "in":
@@ -188,13 +216,16 @@ const ProductCategory = () => {
             type="number"
             className="w-100 form-control"
             onChange={(e) => handleFieldChange(i, e.target.value)}
-
           />
         );
 
       case "value":
         return (
-          <select id={`input-${i}`} className="w-100 form-select" onChange={(e) => handleFieldChange(i, e.target.value)}>
+          <select
+            id={`input-${i}`}
+            className="w-100 form-select"
+            onChange={(e) => handleFieldChange(i, e.target.value)}
+          >
             <option value="">select</option>
             {v.question_value.map((value, i) => {
               return (
@@ -331,13 +362,22 @@ const ProductCategory = () => {
                   );
                 })}
               </div>
-              {noDataFound && (
+              {noDataFound && !errorMessage && (
                 <div
                   className="alert alert-primary fesibility-fontSize fw-bold"
                   role="alert"
                 >
                   Sorry! We don’t have any products/services that match your
                   requirements
+                </div>
+              )}
+
+              {errorMessage && (
+                <div
+                  className="alert alert-danger fesibility-fontSize fw-bold"
+                  role="alert"
+                >
+                  {errorMessage}
                 </div>
               )}
             </div>
@@ -348,7 +388,7 @@ const ProductCategory = () => {
                   type="button"
                   className="btn btn-transparent border w-100"
                   data-bs-dismiss="modal"
-                  id="dismissModal"
+                  id="dismissModal"                 
                 >
                   Close
                 </button>
