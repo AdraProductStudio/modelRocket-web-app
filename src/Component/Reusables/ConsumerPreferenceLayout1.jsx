@@ -17,42 +17,23 @@ const ConsumerPreferenceLayout = () => {
   const [productComparison, setProductComparison] = useState([]);
   const [showGraphSection, setShowGraphSection] = useState(false); // State to track when to show the graph section
 
-  //   const settings = {
-  //     draggable: false,
-  //     swipeToSlide: false,
-  //     touchMove: false,
-  //     dots: false,
-  //     infinite: false,
-  //     speed: 500,
-  //     slidesToShow: 1,
-  //     slidesToScroll: 1,
-  //     initialSlide: sliderIndex,
-  //     afterChange: (index) => setSliderIndex(index), // Update slider index
-  //   };
+  const [callHandleDone,setCallHandleDone]=useState(false);
+
 
   useEffect(() => {
     setInitialGlow(true);
     const get_attributes = async () => {
       const getProduct = {
         client_id: localStorage.getItem("client_id"),
-        product_category_id: localStorage.getItem("product_id"),
+        product_category_id: localStorage.getItem("selectedCategoryId"),
       };
-
-      console.log()
 
       try {
         await axiosInstance.post("/get_attributes", getProduct).then((res) => {
           setInitialGlow(false);
-          setApiRequest(res.data.data);
-          setMainCriteriaPairs(res.data.data.main_criteria_pairs);
-
-          var props = {
-            client_id: localStorage.getItem("client_id"),
-            product_category_id: localStorage.getItem("product_id"),
-            requestData: res.data.data
-          }
-
-          handleDone(props)
+          setApiRequest(res.data.data[0]);
+          setMainCriteriaPairs(res.data.data[0].main_criteria_pairs);
+          setCallHandleDone(!callHandleDone)
         });
       } catch (err) {
         console.log(err);
@@ -61,7 +42,7 @@ const ConsumerPreferenceLayout = () => {
 
     if (
       localStorage.getItem("client_id") !== null &&
-      localStorage.getItem("product_id")
+      localStorage.getItem("selectedCategoryId")
     ) {
       get_attributes();
     }
@@ -114,25 +95,24 @@ const ConsumerPreferenceLayout = () => {
     }
   };
 
-  const [graphData, setGraphData] = useState({}); 
+  
+  const [graphData, setGraphData] = useState({});
 
-  const handleDone = async (params) => {
-    var updatedApiRequest = {}
-    if (params.client_id === undefined && params.product_category_id === undefined) {
-      updatedApiRequest = {
+  const handleDone = async (initialRender) => {
+    if(initialRender === undefined){
+      var updatedApiRequest = {
         ...apiRequest,
         user_importance: sliderValues.map(convertSliderValue),
       };
-
-      console.log(updatedApiRequest)
-    } else {
-      const defaultValuesSetting = Array(params.requestData.main_criteria_pairs.length).fill(1)
-      updatedApiRequest = {
-        ...params.requestData,
-        user_importance: defaultValuesSetting,
+    }else{
+      var updatedApiRequest = {
+        ...apiRequest,
+        client_id:localStorage.getItem("client_id"),
+        user_importance: sliderValues.map(convertSliderValue),
       };
+      console.log(updatedApiRequest)
     }
-
+   
 
     try {
       setLoading(true);
@@ -146,7 +126,6 @@ const ConsumerPreferenceLayout = () => {
       if (response.data.error_code === 200) {
         setProductComparison(response.data.data.product_comparisons);
         setGraphData(response.data.data.criteria_weights);
-        console.log(response.data.data)
       } else {
         toast.error(response.data.message);
       }
@@ -159,7 +138,6 @@ const ConsumerPreferenceLayout = () => {
 
   const handleReset = async () => {
     setSliderIndex(0); // Reset slider index to 0
-    setShowGraphSection(false);
 
     // Optionally reset other state variables if needed
     // For example, reset slider values to their defaults
@@ -195,7 +173,7 @@ const ConsumerPreferenceLayout = () => {
     }
   };
 
-  //   const renderTabContent = () => {
+ 
   //     switch (activeTab) {
   //       case "topRecommendations":
   //         return (
@@ -301,6 +279,13 @@ const ConsumerPreferenceLayout = () => {
     afterChange: (index) => setSliderIndex(index), // Update slider index
   };
 
+  console.log(sliderIndex);
+
+
+  useEffect(()=>{
+    handleDone("initialRender")
+  },[apiRequest])
+
 
   return (
     <>
@@ -401,64 +386,7 @@ const ConsumerPreferenceLayout = () => {
             {/* Right-side container */}
 
             <div className="col-lg-6 h-100 pe-0 ps-2 py-3">
-              {/* <div className=" card h-100 border-0 shadow-sm rounded-4 overflow-scroll">
-                {loading ? 
-                  <div className="d-flex justify-content-center align-items-center h-100">
-                    <img
-                      src={require("../assets/loadings.gif")}
-                      className="w-15"
-                      alt="loading-gif"
-                    />
-                  </div>
-                 : productComparison.length === 0 ? 
-                  <div className="">
-                    <ul className="nav nav-tabs ">
-                      <li className="nav-item w-50 text-center">
-                        <a
-                          className={`nav-link title ${
-                            activeTab === "topRecommendations"
-                              ? "topRecommendations active"
-                              : ""
-                          }`}
-                          href="#topRecommendations"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setActiveTab("topRecommendations");
-                          }}
-                        >
-                          Top Recommendations
-                        </a>
-                      </li>
-                      <li className="nav-item w-50 text-center">
-                        <a
-                          className={`nav-link title ${
-                            activeTab === "consumerPreference"
-                              ? "consumerPreference active "
-                              : ""
-                          }`}
-                          href="#consumerPreference"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setActiveTab("consumerPreference");
-                          }}
-                        >
-                          Consumer Fingerprint
-                        </a>
-                      </li>
-                    </ul>
-                    <div className="mt-3">{renderTabContent()}</div>
-                    
-                  </div>
-                 : 
-                  <div className="d-flex justify-content-center align-items-center h-100">
-                    <img
-                      src={require("../assets/NoDataFound.jpg")}
-                      className="w-75"
-                      alt="No Data Found"
-                    />
-                  </div>
-                }
-              </div> */}
+             
               <div className="card h-100 border-0 shadow-sm rounded-4 d-flex flex-wrap p-2">
                 {/* secion one  */}
                 <div className="h-50 py-1">
@@ -473,7 +401,7 @@ const ConsumerPreferenceLayout = () => {
                 {/* secion two  */}
                 <div className="h-50">
                   <div className="card h-100 overflow-scroll">
-                    {/* <div className="card-title m-2">Top Recommendations</div> */}
+                    <div className="card-title m-2">Top Recommendations</div>
                     {showGraphSection && (
                       <>
                         <h6 className="m-2">
@@ -505,76 +433,6 @@ const ConsumerPreferenceLayout = () => {
                         </div>
                       </>
                     )}
-
-                    {
-                      showGraphSection && productComparison.length>0 ? 
-                        <div> 
-                          <h4 className="title mb-1 pt-4 mb-3 px-4">
-                            Top Recommendations
-                          </h4>
-                          <div className="top-recommendation-card-container px-4">
-                            {productComparison.map((item, index) => (
-                              <div className="card mb-3 p-0" key={index}>
-                                <div className="row g-0">
-                                  <div className="col-md-12">
-                                    <div className="card-body mb-0">
-                                      <h5 className="card-title fw-bold">
-                                        {item.name}
-                                      </h5>
-                                      <p className="card-text">{item.desc}</p>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="container-fluid my-3 mb-4">
-                                  <div className="row mx-0">
-                                    {/* Mapping non-quantified values into item.features */}
-                                    {item["non-quantified-values"].map(
-                                      (feature, index) => {
-                                        // Get the label and value from each feature object
-                                        const label = Object.keys(feature)[0]; // Extracting the label
-                                        const value = feature[label]; // Extracting the value
-      
-                                        // Calculate the width of the column dynamically based on the length of the label and value
-                                        const labelWidth = `${
-                                          (label.length + 2) * 10
-                                        }px`; // Adjust the multiplier according to your font size and padding
-                                        const valueWidth = `${
-                                          (value.length + 2) * 10
-                                        }px`; // Adjust the multiplier according to your font size and padding
-                                        const columnWidth =
-                                          label.length > value.length
-                                            ? labelWidth
-                                            : valueWidth;
-      
-                                        // Rendering JSX for each feature
-                                        return (
-                                          <div
-                                            className="col mb-3 price-container"
-                                            key={index}
-                                            style={{ minWidth: columnWidth }}
-                                          >
-                                            <div className="form-floating">
-                                              <input
-                                                type="text"
-                                                className="w-100 pt-3 px-3 price-input-field pe-none"
-                                                value={value}
-                                                readOnly
-                                              />
-                                              <p className="special-label">{label}</p>
-                                            </div>
-                                          </div>
-                                        );
-                                      }
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      :
-                        null
-                    }
                   </div>
                 </div>
               </div>

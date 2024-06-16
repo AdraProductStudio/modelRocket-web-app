@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./Component/Home";
 import AuthPage from "./Component/AuthPage";
-import ConsumerPreferenceLayout from "./Component/Reusables/ConsumerPreferenceLayout";
+import ConsumerPreferenceLayout from "../src/Component/Reusables/ConsumerPreferenceLayout";
 import { Toaster } from "react-hot-toast";
 import ProductCategory from "./Component/Reusables/ProductCategory";
 
@@ -12,14 +12,14 @@ function App() {
       <Routes>
         <Route path="/" element={<AuthPage />}>
           <Route index exact element={<Home />} />
-
-          <Route path="category">
-            <Route index exact element={<ProductCategory />} />
-            <Route
+          <Route
               path="consumer_preference"
               exact
               element={<ConsumerPreferenceLayout />}
             />
+
+          <Route path="category">
+            <Route index exact element={<ProductCategory />} />      
           </Route>
 
           <Route path="*" element={<h1>404 Not Found</h1>} />

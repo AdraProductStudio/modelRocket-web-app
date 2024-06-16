@@ -9,14 +9,17 @@ export function DataAnalysisGrapgh({ graphData }) {
   ]);
   const options = {
     legend: "none",
-  };
+    hAxis: {
+      textPosition: 'none' // This hides the x-axis labels
+    },
+  }
 
   data.unshift(["Element", "Consumer Weight", { role: "style" }]);
   return (
     <Chart
-      chartType="ColumnChart"
+      chartType="BarChart"
       width="100%"
-      height="400px"
+      height="200px"
       data={data}
       options={options}
     />
