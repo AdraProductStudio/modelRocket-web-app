@@ -3,6 +3,8 @@ import axiosInstance from "../Services/axiosInstance";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { Button, Modal } from "react-bootstrap";
+import { FaInfoCircle } from "react-icons/fa";
+
 
 const Home = () => {
   const [products, setProducts] = useState([]);

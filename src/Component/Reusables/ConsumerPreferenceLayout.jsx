@@ -114,7 +114,7 @@ const ConsumerPreferenceLayout = () => {
     }
   };
 
-  const [graphData, setGraphData] = useState({}); 
+  const [graphData, setGraphData] = useState({});
 
   const handleDone = async (params) => {
     var updatedApiRequest = {}
@@ -311,7 +311,7 @@ const ConsumerPreferenceLayout = () => {
 
             <div className="col-lg-6 h-100 ps-0 pe-2 py-3">
               <div className=" card border-0 shadow-sm h-100 rounded-4">
-                <h4 className="title mb-1 pt-4 pb-3 px-4">
+                <h4 className="card-title mb-1 pt-4 pb-3 px-4">
                   Consumer Preference
                 </h4>
                 <div className="range-bar-container slidecontainer  px-5">
@@ -465,7 +465,12 @@ const ConsumerPreferenceLayout = () => {
                   <div className="card h-100 overflow-scroll">
                     <h6 className="card-title m-2">Consumer fingerprint</h6>
                     <div className="card-body mb-2">
-                      <DataAnalysisGrapgh graphData={graphData} />
+                      {
+                        Object.keys(graphData).length > 0 ?
+                          <DataAnalysisGrapgh graphData={graphData} />
+                        : 
+                          null
+                      }
                     </div>
                   </div>
                 </div>
@@ -476,7 +481,12 @@ const ConsumerPreferenceLayout = () => {
                     {/* <div className="card-title m-2">Top Recommendations</div> */}
                     {showGraphSection && (
                       <>
-                        <h6 className="m-2">
+                        <div>
+                          <h4 className="card-title mb-1 pt-4 mb-3 px-2">
+                            Top Recommendations
+                          </h4>
+                        </div>
+                        <h6 className="m-2 recommendations-content">
                           Options from the catalog that best match the consumer
                           preference weights will be displayed here. The
                           following are the consumer weights sorted by priority
@@ -507,11 +517,9 @@ const ConsumerPreferenceLayout = () => {
                     )}
 
                     {
-                      showGraphSection && productComparison.length>0 ? 
-                        <div> 
-                          <h4 className="title mb-1 pt-4 mb-3 px-4">
-                            Top Recommendations
-                          </h4>
+                      showGraphSection && productComparison.length > 0 ?
+                        <div>
+
                           <div className="top-recommendation-card-container px-4">
                             {productComparison.map((item, index) => (
                               <div className="card mb-3 p-0" key={index}>
@@ -533,19 +541,17 @@ const ConsumerPreferenceLayout = () => {
                                         // Get the label and value from each feature object
                                         const label = Object.keys(feature)[0]; // Extracting the label
                                         const value = feature[label]; // Extracting the value
-      
+
                                         // Calculate the width of the column dynamically based on the length of the label and value
-                                        const labelWidth = `${
-                                          (label.length + 2) * 10
-                                        }px`; // Adjust the multiplier according to your font size and padding
-                                        const valueWidth = `${
-                                          (value.length + 2) * 10
-                                        }px`; // Adjust the multiplier according to your font size and padding
+                                        const labelWidth = `${(label.length + 2) * 10
+                                          }px`; // Adjust the multiplier according to your font size and padding
+                                        const valueWidth = `${(value.length + 2) * 10
+                                          }px`; // Adjust the multiplier according to your font size and padding
                                         const columnWidth =
                                           label.length > value.length
                                             ? labelWidth
                                             : valueWidth;
-      
+
                                         // Rendering JSX for each feature
                                         return (
                                           <div
@@ -572,7 +578,7 @@ const ConsumerPreferenceLayout = () => {
                             ))}
                           </div>
                         </div>
-                      :
+                        :
                         null
                     }
                   </div>

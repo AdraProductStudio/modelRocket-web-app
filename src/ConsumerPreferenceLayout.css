@@ -177,3 +177,7 @@
   font-size: 36px !important;
   color: #007bff !important;
 }
+.recommendations-content{
+  font-size: .9rem;
+  color: rgb(69, 68, 68);
+}

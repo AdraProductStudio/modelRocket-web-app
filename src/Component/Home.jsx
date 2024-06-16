@@ -3,6 +3,8 @@ import axiosInstance from "../Services/axiosInstance";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { Button, Modal } from "react-bootstrap";
+import { FaInfoCircle } from "react-icons/fa";
+import { Tooltip } from "react-tooltip";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -10,10 +12,21 @@ const Home = () => {
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [productCategory, setProductCategory] = useState([]);
 
+  const [formData, setFormData] = useState({});
+  const [validationErrors, setValidationErrors] = useState({});
+
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+  const [currentQuestions, setCurrentQuestions] = useState([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+  const [correctAnswers, setCorrectAnswers] = useState(new Array(currentQuestions.length).fill(false));
+
+
+
 
   const pageNavigate = useNavigate();
 
@@ -52,83 +65,19 @@ const Home = () => {
         toast.error(response.data.message)
       }
     })
-
-    // switch (id) {
-    //   case 2:
-    //     setProductCategory([
-    //       {
-    //         desc: "Product category description will be displayed here",
-    //         feasibility: [
-    //           {
-    //             bountary_type: "in",
-    //             bountary_value: ["624617", "624618", "624619"],
-    //             id: 6,
-    //             question: "what is your zip code?",
-    //             question_type: "numeric",
-    //             question_value: [],
-    //           },
-    //           {
-    //             bountary_type: ">",
-    //             bountary_value: ["3000"],
-    //             id: 7,
-    //             question: "What is your approximate budget?",
-    //             question_type: "numeric",
-    //             question_value: [],
-    //           },
-    //           {
-    //             bountary_type: "value",
-    //             bountary_value: ["Natural"],
-    //             id: 8,
-    //             question: "Are you looking for natural or artificial diamonds?",
-    //             question_type: "options",
-    //             question_value: ["Natural", "Artificial"],
-    //           },
-    //         ],
-    //         id: 3,
-    //         name: "Jewellery",
-    //       },
-    //     ]);
-    //     break;
-    //   case 1:
-    //     setProductCategory([
-    //       {
-    //         desc: "Category description will be displayed here",
-    //         feasibility: [],
-    //         id: 2,
-    //         name: "Window Replace",
-    //       },
-    //       {
-    //         desc: "Category description will be displayed here",
-    //         feasibility: [
-    //           {
-    //             bountary_type: "in",
-    //             bountary_value: ["20854", "20878", "20910", "20911"],
-    //             id: 1,
-    //             question: "Please enter your zip code",
-    //             question_type: "numeric",
-    //             question_value: [],
-    //           },
-    //           {
-    //             bountary_type: ">",
-    //             bountary_value: ["3"],
-    //             id: 2,
-    //             question: "How many windows would you like repaired?",
-    //             question_type: "numeric",
-    //             question_value: [],
-    //           },
-    //         ],
-    //         id: 1,
-    //         name: "Window Repair",
-    //       },
-    //     ]);
-
-    //   default:
-    //     break;
-    // }
   };
 
   const handleOnChange = (productId) => {
     localStorage.setItem("product_id", productId);
+    const selectedCategory = productCategory.find(
+      (category) => category.id === parseInt(productId)
+    );
+    if (selectedCategory) {
+      setCurrentQuestions(selectedCategory.feasibility);
+    } else {
+      setCurrentQuestions([]);
+      toast.error("Selected category not found.");
+    }
   };
 
   const handleNextButtonClick = () => {
@@ -140,9 +89,8 @@ const Home = () => {
     if (selectedCategory) {
 
       if (selectedCategory.feasibility && selectedCategory.feasibility.length > 0) {
-        pageNavigate("/consumer_preference")
-        // handleShow()
-        // console.log("Feasibility options found:", selectedCategory.feasibility);
+        handleShow()
+        console.log("Feasibility options found:", selectedCategory.feasibility);
       } else {
         pageNavigate("/consumer_preference")
       }
@@ -151,6 +99,147 @@ const Home = () => {
     }
   };
 
+  const handleInputChange = (e, questionId) => {
+    const userInput = e.target.value;
+    setFormData({ ...formData, [questionId]: userInput });
+  
+    const question = currentQuestions.find(q => q.id === questionId);
+    if (question && validateAnswer(question, userInput)) {
+      const index = currentQuestions.findIndex(q => q.id === questionId);
+      if (index !== -1) {
+        const newCorrectAnswers = [...correctAnswers];
+        newCorrectAnswers[index] = true;
+        setCorrectAnswers(newCorrectAnswers);
+      }
+    }
+  };
+
+  const validateAnswer = (question, userInput) => {
+
+    return question.correct_answer === userInput;
+  };
+  
+  const handleNextQuestion = () => {
+    const currentQuestion = currentQuestions[currentQuestionIndex];
+    const error = validateQuestion(currentQuestion);
+    if (error) {
+      toast.error(error);
+    } else {
+      if (currentQuestionIndex < currentQuestions.length - 1) {
+        setCurrentQuestionIndex(currentQuestionIndex + 1);
+      } else {
+        handleClose(); 
+        pageNavigate("/consumer_preference")
+      }
+    }
+  };
+  
+  
+  const handlePreviousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
+  };
+
+
+  const validateQuestion = (question) => {
+    const userInput = formData[question.id];
+    switch (question.bountary_type) {
+      case "in":
+        if (!question.bountary_value.includes(userInput)) {
+          return `Valid values are: ${question.bountary_value.join(", ")}`;
+        }
+        break;
+      case ">":
+        if (parseFloat(userInput) <= parseFloat(question.bountary_value[0])) {
+          return `Value must be greater than ${question.bountary_value[0]}`;
+        }
+        break;
+      case "value":
+        if (!question.bountary_value.includes(userInput)) {
+          return `Valid values are: ${question.bountary_value.join(", ")}`;
+        }
+        break;
+      default:
+        break;
+    }
+    return null;
+  };
+  
+  
+ 
+  
+
+ 
+
+  const renderQuestionInputs = () => {
+    const question = currentQuestions[currentQuestionIndex];
+  
+    if (!question) {
+      return null;
+    }
+  
+    const error = validationErrors[question.id];
+  
+    let inputField;
+  
+    switch (question.question_type) {
+      case "numeric":
+        inputField = (
+          <input
+            type="number"
+            className={`form-control ${error ? "is-invalid" : ""}`}
+            placeholder={question.question}
+            aria-label={question.question}
+            aria-describedby="basic-addon2"
+            value={formData[question.id] || ""}
+            onChange={(e) => handleInputChange(e, question.id)}
+          />
+        );
+        break;
+      case "options":
+        inputField = (
+          <select
+            className={`form-select ${error ? "is-invalid" : ""}`}
+            value={formData[question.id] || ""}
+            onChange={(e) => handleInputChange(e, question.id)}
+          >
+            <option value="">Select an option</option>
+            {question.question_value.map((option, index) => (
+              <option key={index} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        );
+        break;
+      default:
+        inputField = (
+          <input
+            type="text"
+            className={`form-control ${error ? "is-invalid" : ""}`}
+            placeholder={question.question}
+            aria-label={question.question}
+            aria-describedby="basic-addon2"
+            value={formData[question.id] || ""}
+            onChange={(e) => handleInputChange(e, question.id)}
+          />
+        );
+        break;
+    }
+  
+    return (
+      <div key={question.id} className="mb-3">
+              <Tooltip id="dynamic-tooltip" />
+        <label className="form-label">{question.question} {question.tool_tip ? <FaInfoCircle data-tooltip-id="dynamic-tooltip" data-tooltip-content={question.tool_tip}/>:null}</label>
+        {inputField}
+        {error && <div className="invalid-feedback">{error}</div>}
+      </div>
+    );
+  };
+  
+  
+  
 
 
   return (
@@ -182,7 +271,7 @@ const Home = () => {
                 <div className="card-body">
                   <div className="py-3">
                     <img
-                      src={require("../Component/assets/default.jpeg")}
+                      src="https://cdn.matsuritech.com/client/default_client.jpeg"
                       height={200}
                       className="rounded-4 w-100"
                       alt="..."
@@ -275,19 +364,19 @@ const Home = () => {
         onHide={handleClose}
         backdrop="static"
         keyboard={false}
+        centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>Modal title</Modal.Title>
+          {/* <Modal.Title>Modal title</Modal.Title> */}
         </Modal.Header>
         <Modal.Body>
-          I will not close if you click outside me. Do not even try to press
-          escape key.
+        {renderQuestionInputs()}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
+          <Button variant="secondary" onClick={handlePreviousQuestion} disabled={currentQuestionIndex === 0}>
+            Previous
           </Button>
-          <Button variant="primary">Understood</Button>
+          <Button variant="primary" onClick={handleNextQuestion}>Next</Button>
         </Modal.Footer>
       </Modal>
     </div>
