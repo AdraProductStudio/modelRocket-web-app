@@ -17,7 +17,10 @@ const Home = () => {
 
   const [show, setShow] = useState(false);
 
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setShow(false);
+    setMainCreteriaContent(false)
+  }
   const handleShow = () => setShow(true);
 
   const [currentQuestions, setCurrentQuestions] = useState([]);
@@ -25,6 +28,9 @@ const Home = () => {
 
   const [correctAnswers, setCorrectAnswers] = useState(new Array(currentQuestions.length).fill(false));
 
+  const [loading, setLoading] = useState(false)
+
+  const [mainCreteriaContent, setMainCreteriaContent] = useState(false)
 
 
 
@@ -68,10 +74,13 @@ const Home = () => {
   };
 
   const handleOnChange = (productId) => {
+   
     localStorage.setItem("product_id", productId);
     const selectedCategory = productCategory.find(
       (category) => category.id === parseInt(productId)
     );
+
+    
     if (selectedCategory) {
       setCurrentQuestions(selectedCategory.feasibility);
     } else {
@@ -128,8 +137,31 @@ const Home = () => {
       if (currentQuestionIndex < currentQuestions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
       } else {
-        handleClose(); 
-        pageNavigate("/consumer_preference")
+        setLoading(true)
+        const getAttributesParamters = {
+          client_id:localStorage.getItem("client_id"),
+          product_category_id:localStorage.getItem("product_id")
+        }
+        axiosInstance.post("/get_attributes",getAttributesParamters)
+        .then((response)=>{
+          if(response.data.error_code === 200){
+            setLoading(false)
+            if(response.data.data.main_criteria_pairs.length > 0){
+                handleClose(); 
+                pageNavigate("/consumer_preference")
+            } else {
+              handleShow()
+              setMainCreteriaContent(true)
+            }
+          }else {
+            toast.error(response.data.message)
+          }
+        }).catch((err)=>{
+          toast.error(err)
+        }).finally(
+          setLoading(false)
+        )
+        
       }
     }
   };
@@ -155,6 +187,11 @@ const Home = () => {
           return `Value must be greater than ${question.bountary_value[0]}`;
         }
         break;
+      case "<":
+        if (parseFloat(userInput) >= parseFloat(question.bountary_value[0])) {
+          return `Value must be less than ${question.bountary_value[0]}`;
+        }
+        break;  
       case "value":
         if (!question.bountary_value.includes(userInput)) {
           return `Valid values are: ${question.bountary_value.join(", ")}`;
@@ -166,12 +203,6 @@ const Home = () => {
     return null;
   };
   
-  
- 
-  
-
- 
-
   const renderQuestionInputs = () => {
     const question = currentQuestions[currentQuestionIndex];
   
@@ -370,14 +401,30 @@ const Home = () => {
           {/* <Modal.Title>Modal title</Modal.Title> */}
         </Modal.Header>
         <Modal.Body>
-        {renderQuestionInputs()}
+          {mainCreteriaContent ? <label className="form-label">
+
+            Thank you for answering our questions. Someone from our team will be in touch with you shortly!
+
+
+          </label>: renderQuestionInputs()}
+       
         </Modal.Body>
+
+        {mainCreteriaContent ? 
+        <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose} >
+          Close
+        </Button>
+      </Modal.Footer>
+        
+        :
         <Modal.Footer>
           <Button variant="secondary" onClick={handlePreviousQuestion} disabled={currentQuestionIndex === 0}>
             Previous
           </Button>
-          <Button variant="primary" onClick={handleNextQuestion}>Next</Button>
+          <Button variant="primary" onClick={handleNextQuestion} disabled={loading}>{loading ? 'Please Wait':'Next'}</Button>
         </Modal.Footer>
+        }
       </Modal>
     </div>
   );
