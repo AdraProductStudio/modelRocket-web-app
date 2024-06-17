@@ -53,8 +53,8 @@ code {
 }
 
 :root{
-  --nav-height:11vh;
-  --main-body-height:89vh;
+  --nav-height:10vh;
+  --main-body-height:90vh;
   --breadcrumps-height:7.5vh;
   --nav-bg-color:white;
   --body-bg-color:#65a3ff35;
@@ -154,7 +154,8 @@ code {
 }
 
 .navLogo{
-  width: 9rem; 
+  width: 9rem;
+  height: 4rem; 
 }
 
 .form-control:focus,.form-select:focus {
@@ -168,4 +169,8 @@ code {
 .btn-primary{
   background-color: #65a3ff !important;
   border:none !important;
+}
+
+.tooltipWidth{
+  width: 22rem !important;
 }

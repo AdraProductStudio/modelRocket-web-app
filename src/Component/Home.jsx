@@ -192,7 +192,7 @@ const Home = () => {
     switch (question.bountary_type) {
       case "in":
         if (!question.bountary_value.includes(userInput)) {
-          return `Valid values are: ${question.bountary_value.join(", ")}`;
+          return "Sorry, we don't provide products or services that meet your requirements.";
         }
         break;
       case ">":
@@ -338,7 +338,7 @@ const Home = () => {
                       data-bs-toggle="modal"
                       data-bs-target={`#exampleModalToggle-${product.id}`}
                     >
-                      View products
+                      View consumer experience
                     </button>
                   </div>
                 </div>

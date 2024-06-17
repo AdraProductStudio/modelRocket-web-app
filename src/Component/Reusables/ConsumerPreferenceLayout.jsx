@@ -219,10 +219,10 @@ const ConsumerPreferenceLayout = () => {
                 <div className="row align-items-center">
                   <div className="col">
                     <h4 className="card-title mb-1 pt-4 pb-3 px-4">
-                      Consumer Preference
+                    Please use the slider to indicate which of the following two attributes is more important to you
 
-                      <Tooltip id="tooltip_one" />
-                      <label className="form-label ps-2"> <FaInfoCircle data-tooltip-id="tooltip_one" data-tooltip-content="Consumer Preference" /> </label>
+                      <Tooltip id="tooltip_one" className="tooltipWidth"/>
+                      <label className="form-label ps-2"> <FaInfoCircle data-tooltip-id="tooltip_one" data-tooltip-content="This is a representation of the consumer engagement" /> </label>
                     </h4>
                   </div>
                 </div>
@@ -322,10 +322,10 @@ const ConsumerPreferenceLayout = () => {
                 <div className="h-50 py-1">
                   <div className="card h-100 overflowY">
                     <h6 className="card-title m-2">
-                      Consumer fingerprint
+                      Consumer weights
 
-                      <Tooltip id="tooltip_two" />
-                      <label className="form-label ps-2"> <FaInfoCircle data-tooltip-id="tooltip_two" data-tooltip-content="Consumer fingerprint" /> </label>
+                      <Tooltip id="tooltip_two" className="tooltipWidth"/>
+                      <label className="form-label ps-2"> <FaInfoCircle data-tooltip-id="tooltip_two" data-tooltip-content="This is a view into the consumer's weights" /> </label>
                     </h6>
 
 
@@ -339,7 +339,7 @@ const ConsumerPreferenceLayout = () => {
                           :
                           <div className="h-100 row align-items-center justify-content-center">
                             <div className="col text-center">
-                              <button type="button" className="btn btn-primary" onClick={() => setViewCharts(true)}>View Charts</button>
+                              <button type="button" className="btn btn-primary" onClick={() => setViewCharts(true)}>View consumer weights</button>
                             </div>
                           </div>
                       }
@@ -357,8 +357,8 @@ const ConsumerPreferenceLayout = () => {
                           <h4 className="card-title mb-1 pt-4 mb-3 px-2">
                             Top Recommendations
 
-                            <Tooltip id="tooltip_three" />
-                            <label className="form-label ps-2"> <FaInfoCircle data-tooltip-id="tooltip_three" data-tooltip-content="Top Recommendations" /> </label>
+                            <Tooltip id="tooltip_three" className="tooltipWidth"/>
+                            <label className="form-label ps-2"> <FaInfoCircle data-tooltip-id="tooltip_three" data-tooltip-content="This is a view into the recommendations made to the consumer and the rationale behind it" /> </label>
                           </h4>
                         </div>
                         <h6 className="m-2 recommendations-content">
@@ -459,7 +459,7 @@ const ConsumerPreferenceLayout = () => {
                       showGraphSection ?
                         <div className="h-100 row align-items-center justify-content-center">
                           <div className="col text-center">
-                            <button type="button" className="btn btn-primary" onClick={() => setViewGraph(true)}>View Recommendation</button>
+                            <button type="button" className="btn btn-primary" onClick={() => setViewGraph(true)}>View recommendations</button>
                           </div>
                         </div>
                       :
