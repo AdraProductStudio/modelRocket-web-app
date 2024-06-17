@@ -186,7 +186,10 @@ const ConsumerPreferenceLayout = () => {
   const sliderKey = `slider-${sliderIndex}`;
 
 
-  const next = () => {
+  const next = () => {     
+    if(mainCriteriaPairs.length / 2 <= sliderIndex){
+      setShowGraphSection(true)
+    }
     sliderRef.slickNext();
   };
 
@@ -218,12 +221,12 @@ const ConsumerPreferenceLayout = () => {
               <div className=" card border-0 shadow-sm h-100 rounded-4">
                 <div className="row align-items-center">
                   <div className="col">
-                    <h4 className="card-title mb-1 pt-4 pb-3 px-4">
-                    Please use the slider to indicate which of the following two attributes is more important to you
-
+                    <h4 className="card-title mb-1 pt-4 pb-3 px-4"> 
+                      Consumer preference                   
                       <Tooltip id="tooltip_one" className="tooltipWidth"/>
                       <label className="form-label ps-2"> <FaInfoCircle data-tooltip-id="tooltip_one" data-tooltip-content="This is a representation of the consumer engagement" /> </label>
                     </h4>
+                    <label className="form-label mx-4">Please use the slider to indicate which of the following two attributes is more important to you</label>
                   </div>
                 </div>
 

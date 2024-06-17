@@ -423,7 +423,7 @@ const Home = () => {
         <Modal.Body>
           {mainCreteriaContent ? (
             <label className="form-label">
-              <img src={require("../Component/assets/businessDeal.png")} width={300} height={300} className="rounded mx-auto d-block mb-4" alt="..."/>
+              <img src={require("../Component/assets/businessDeal.png")} width={270} height={220} className="rounded mx-auto d-block mb-4" alt="..."/>
               Thank you for answering our questions. Someone from our team will
               be in touch with you shortly!
             </label>
