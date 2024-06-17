@@ -23,7 +23,7 @@ const AuthPage = () => {
 
     const removeLocalStorage = () => {
       localStorage.removeItem("client_id")
-      localStorage.removeItem("product_category_id")
+      localStorage.removeItem("product_id")
     }
   return (
     <div className="vh-100">

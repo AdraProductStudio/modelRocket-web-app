@@ -9,8 +9,9 @@ export function DataAnalysisGrapgh({ graphData }) {
   ]);
   const options = {
     legend: "none",
-    hAxis: {
-      textPosition: 'none' // This hides the x-axis labels
+    hAxis: { 
+      textPosition: 'none',
+      minValue:1
     },
   }
 

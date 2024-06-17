@@ -8,8 +8,7 @@ import { Tooltip } from "react-tooltip";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
-  const [initialGlow, setInitialGlow] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [initialGlow, setInitialGlow] = useState(false);  
   const [productCategory, setProductCategory] = useState([]);
 
   const [formData, setFormData] = useState({});
@@ -19,20 +18,21 @@ const Home = () => {
 
   const handleClose = () => {
     setShow(false);
-    setMainCreteriaContent(false)
-  }
+    setMainCreteriaContent(false);
+  };
   const handleShow = () => setShow(true);
 
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
-  const [correctAnswers, setCorrectAnswers] = useState(new Array(currentQuestions.length).fill(false));
+  const [correctAnswers, setCorrectAnswers] = useState(
+    new Array(currentQuestions.length).fill(false)
+  );
 
-  const [loading, setLoading] = useState(false)
+  const [btnLoading, setBtnLoading] = useState(false);
+  
 
-  const [mainCreteriaContent, setMainCreteriaContent] = useState(false)
-
-
+  const [mainCreteriaContent, setMainCreteriaContent] = useState(false);
 
   const pageNavigate = useNavigate();
 
@@ -59,28 +59,34 @@ const Home = () => {
   }, []);
 
   const redirectCategoryPage = (id) => {
-    localStorage.setItem("client_id", id);
-    setSelectedProductId(id);
+    setProductCategory([]);
+    localStorage.setItem("client_id", id);    
 
-    axiosInstance.post("/get_product_categories", {
-      client_id:localStorage.getItem("client_id")
-    }).then((response)=>{
-      if(response.data.error_code === 200){
-        setProductCategory(response.data.data)
-      }else {
-        toast.error(response.data.message)
-      }
-    })
+    axiosInstance
+      .post("/get_product_categories", {
+        client_id: localStorage.getItem("client_id"),
+      })
+      .then((response) => {
+        if (response.data.error_code === 200) {
+          setProductCategory(response.data.data);
+
+          setFormData({});
+          setValidationErrors({});
+          setCurrentQuestions([]);
+          setCurrentQuestionIndex(0);
+        } else {
+          toast.error(response.data.message);
+        }
+      });
   };
 
   const handleOnChange = (productId) => {
-   
+  
     localStorage.setItem("product_id", productId);
     const selectedCategory = productCategory.find(
       (category) => category.id === parseInt(productId)
     );
 
-    
     if (selectedCategory) {
       setCurrentQuestions(selectedCategory.feasibility);
     } else {
@@ -93,15 +99,22 @@ const Home = () => {
 
     const productId = localStorage.getItem("product_id");
 
-    const selectedCategory = productCategory.find(category => category.id === parseInt(productId));
 
+    const selectedCategory = productCategory.find(
+      (category) => category.id === parseInt(productId)
+    );
+
+   
+    
     if (selectedCategory) {
-
-      if (selectedCategory.feasibility && selectedCategory.feasibility.length > 0) {
-        handleShow()
-        console.log("Feasibility options found:", selectedCategory.feasibility);
+      if (
+        selectedCategory.feasibility &&
+        selectedCategory.feasibility.length > 0
+      ) {
+        handleShow();
+      
       } else {
-        pageNavigate("/consumer_preference")
+        pageNavigate("/consumer_preference");
       }
     } else {
       toast.error("Selected category not found.");
@@ -111,10 +124,10 @@ const Home = () => {
   const handleInputChange = (e, questionId) => {
     const userInput = e.target.value;
     setFormData({ ...formData, [questionId]: userInput });
-  
-    const question = currentQuestions.find(q => q.id === questionId);
+
+    const question = currentQuestions.find((q) => q.id === questionId);
     if (question && validateAnswer(question, userInput)) {
-      const index = currentQuestions.findIndex(q => q.id === questionId);
+      const index = currentQuestions.findIndex((q) => q.id === questionId);
       if (index !== -1) {
         const newCorrectAnswers = [...correctAnswers];
         newCorrectAnswers[index] = true;
@@ -124,10 +137,9 @@ const Home = () => {
   };
 
   const validateAnswer = (question, userInput) => {
-
     return question.correct_answer === userInput;
   };
-  
+
   const handleNextQuestion = () => {
     const currentQuestion = currentQuestions[currentQuestionIndex];
     const error = validateQuestion(currentQuestion);
@@ -137,42 +149,43 @@ const Home = () => {
       if (currentQuestionIndex < currentQuestions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
       } else {
-        setLoading(true)
-        const getAttributesParamters = {
-          client_id:localStorage.getItem("client_id"),
-          product_category_id:localStorage.getItem("product_id")
-        }
-        axiosInstance.post("/get_attributes",getAttributesParamters)
-        .then((response)=>{
-          if(response.data.error_code === 200){
-            setLoading(false)
-            if(response.data.data.main_criteria_pairs.length > 0){
-                handleClose(); 
-                pageNavigate("/consumer_preference")
-            } else {
-              handleShow()
-              setMainCreteriaContent(true)
-            }
-          }else {
-            toast.error(response.data.message)
-          }
-        }).catch((err)=>{
-          toast.error(err)
-        }).finally(
-          setLoading(false)
-        )
         
+        setBtnLoading(true);
+
+        const getAttributesParamters = {
+          client_id: localStorage.getItem("client_id"),
+          product_category_id: localStorage.getItem("product_id"),
+        };
+        axiosInstance
+          .post("/get_attributes", getAttributesParamters)
+          .then((response) => {
+            if (response.data.error_code === 200) {
+              
+              setBtnLoading(false);
+              if (response.data.data.main_criteria_pairs.length > 0) {
+                handleClose();
+                pageNavigate("/consumer_preference");
+              } else {
+                handleShow();
+                setMainCreteriaContent(true);
+              }
+            } else {
+              toast.error(response.data.message);
+            }
+          })
+          .catch((err) => {
+            toast.error(err);
+          })
+         
       }
     }
   };
-  
-  
+
   const handlePreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
     }
   };
-
 
   const validateQuestion = (question) => {
     const userInput = formData[question.id];
@@ -191,7 +204,7 @@ const Home = () => {
         if (parseFloat(userInput) >= parseFloat(question.bountary_value[0])) {
           return `Value must be less than ${question.bountary_value[0]}`;
         }
-        break;  
+        break;
       case "value":
         if (!question.bountary_value.includes(userInput)) {
           return `Valid values are: ${question.bountary_value.join(", ")}`;
@@ -202,18 +215,18 @@ const Home = () => {
     }
     return null;
   };
-  
+
   const renderQuestionInputs = () => {
     const question = currentQuestions[currentQuestionIndex];
-  
+
     if (!question) {
       return null;
     }
-  
+
     const error = validationErrors[question.id];
-  
+
     let inputField;
-  
+
     switch (question.question_type) {
       case "numeric":
         inputField = (
@@ -258,73 +271,79 @@ const Home = () => {
         );
         break;
     }
-  
+
     return (
       <div key={question.id} className="mb-3">
-              <Tooltip id="dynamic-tooltip" />
-        <label className="form-label">{question.question} {question.tool_tip ? <FaInfoCircle data-tooltip-id="dynamic-tooltip" data-tooltip-content={question.tool_tip}/>:null}</label>
+        <Tooltip id="dynamic-tooltip" />
+        <label className="form-label">
+          {question.question}{" "}
+          {question.tool_tip ? (
+            <FaInfoCircle
+              data-tooltip-id="dynamic-tooltip"
+              data-tooltip-content={question.tool_tip}
+            />
+          ) : null}
+        </label>
         {inputField}
         {error && <div className="invalid-feedback">{error}</div>}
       </div>
     );
   };
-  
-  
-  
-
 
   return (
-    <div className="content-breadcrumps-below-content-height w-100 overflow-scroll placeholder-glow">
+    <div className="content-breadcrumps-below-content-height w-100 overflowY overflowX placeholder-glow">
       <div className="row g-3 pt-4 align-content-stretch">
-        {initialGlow
-          ? Array.from({ length: products.length }).map((_, i) => (
-            <div className="col-12 col-sm-6 col-lg-3" key={i}>
-              <div className="card rounded-4 border-0 h-100">
-                <div className="card-body">
-                  <div className="py-3">
-                    <p className="card-text imagePlaceholder w-100 placeholder rounded-4"></p>
-                  </div>
-                  <h5 className="card-title py-3 w-50 placeholder rounded-2"></h5>
-                  <p className="card-text py-5 w-100 placeholder rounded-2"></p>
+        {initialGlow ?
+          <div className="col-12 col-sm-6 col-lg-3" >
+            <div className="card rounded-4 border-0 h-100">
+              <div className="card-body">
+                <div className="py-3">
+                  <p className="card-text imagePlaceholder w-100 placeholder rounded-4"></p>
                 </div>
-                <div className="card-footer py-3 bg-white rounded-4">
-                  <button
-                    type="button"
-                    className="rounded-2 text-center w-100 placeholder py-3"
-                  ></button>
-                </div>
+                <h5 className="card-title py-3 w-50 placeholder rounded-2"></h5>
+                <p className="card-text py-5 w-100 placeholder rounded-2"></p>
+              </div>
+              <div className="card-footer py-3 bg-white rounded-4">
+                <button
+                  type="button"
+                  className="rounded-2 text-center w-100 placeholder py-3"
+                ></button>
               </div>
             </div>
-          ))
-          : products.map((product) => (
-            <div key={product.id} className="col-12 col-sm-6 col-lg-3">
-              <div className="card rounded-4 border-0 h-100">
-                <div className="card-body">
-                  <div className="py-3">
-                    <img
-                      src="https://cdn.matsuritech.com/client/default_client.jpeg"
-                      height={200}
-                      className="rounded-4 w-100"
-                      alt="..."
-                    />
+          </div>
+        :
+           products.map((product) => (
+              <div key={product.id} className="col-12 col-sm-6 col-lg-3">
+                <div className="card rounded-4 border-0 h-100">
+                  <div className="card-body">
+                    <div className="py-3">
+                      <img
+                        src="https://cdn.matsuritech.com/client/default_client.jpeg"
+                        height={200}
+                        className="rounded-4 w-100"
+                        alt="..."
+                      />
+                    </div>
+                    <h5 className="card-title">{product.name}</h5>
+                    <p className="card-text">{product.desc}</p>
                   </div>
-                  <h5 className="card-title">{product.name}</h5>
-                  <p className="card-text">{product.desc}</p>
-                </div>
-                <div className="card-footer py-3 bg-white rounded-4">
-                  <button
-                    type="button"
-                    className="btn btn-primary text-center w-100"
-                    onClick={() => redirectCategoryPage(product.id)}
-                    data-bs-toggle="modal"
-                    data-bs-target={`#exampleModalToggle-${product.id}`}
-                  >
-                    View products
-                  </button>
+                  <div className="card-footer py-3 bg-white rounded-4">
+                    <button
+                      type="button"
+                      className="btn btn-primary text-center w-100"
+                      onClick={() => {
+                        localStorage.removeItem("product_id");
+                        redirectCategoryPage(product.id)
+                      }}
+                      data-bs-toggle="modal"
+                      data-bs-target={`#exampleModalToggle-${product.id}`}
+                    >
+                      View products
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
       </div>
 
       {/* Modals */}
@@ -361,17 +380,18 @@ const Home = () => {
                 <select
                   className="form-select"
                   aria-label="Default select example"
+                  name="Default_select_example"
                   onChange={(e) => handleOnChange(e.target.value)}
                 >
                   <option value="">select service</option>
                   {productCategory.length > 0
                     ? productCategory.map((category, index) => {
-                      return (
-                        <option value={category.id} key={index}>
-                          {category.name}
-                        </option>
-                      );
-                    })
+                        return (
+                          <option value={category.id} key={index}>
+                            {category.name}
+                          </option>
+                        );
+                      })
                     : null}
                 </select>
               </div>
@@ -401,30 +421,41 @@ const Home = () => {
           {/* <Modal.Title>Modal title</Modal.Title> */}
         </Modal.Header>
         <Modal.Body>
-          {mainCreteriaContent ? <label className="form-label">
-
-            Thank you for answering our questions. Someone from our team will be in touch with you shortly!
-
-
-          </label>: renderQuestionInputs()}
-       
+          {mainCreteriaContent ? (
+            <label className="form-label">
+              <img src={require("../Component/assets/businessDeal.png")} width={300} height={300} className="rounded mx-auto d-block mb-4" alt="..."/>
+              Thank you for answering our questions. Someone from our team will
+              be in touch with you shortly!
+            </label>
+          ) : (
+            renderQuestionInputs()
+          )}
         </Modal.Body>
 
-        {mainCreteriaContent ? 
-        <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose} >
-          Close
-        </Button>
-      </Modal.Footer>
-        
-        :
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handlePreviousQuestion} disabled={currentQuestionIndex === 0}>
-            Previous
-          </Button>
-          <Button variant="primary" onClick={handleNextQuestion} disabled={loading}>{loading ? 'Please Wait':'Next'}</Button>
-        </Modal.Footer>
-        }
+        {mainCreteriaContent ? (
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleClose}>
+              Close
+            </Button>
+          </Modal.Footer>
+        ) : (
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={handlePreviousQuestion}
+              disabled={currentQuestionIndex === 0}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleNextQuestion}
+              disabled={btnLoading}
+            >
+              {btnLoading ? "Please Wait" : "Next"}
+            </Button>
+          </Modal.Footer>
+        )}
       </Modal>
     </div>
   );

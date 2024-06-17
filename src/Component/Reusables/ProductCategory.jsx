@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect,  useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../Services/axiosInstance";
 
 const ProductCategory = () => {
-  const pageRender = useNavigate();
-  const ref = useRef(null);
+  const pageRender = useNavigate();  
 
   const category = [
     {
@@ -27,10 +26,7 @@ const ProductCategory = () => {
 
   const [initialGlow, setInitialGlow] = useState(false);
   const [productCategory, setProductCategory] = useState([]);
-  const [feasibilityData, setFeasibilityData] = useState([]);
-  const [noDataFound, setNoDataFound] = useState(false);
-  const [isErrorStatus, setIsErrorStatus] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [feasibilityData, setFeasibilityData] = useState([]); 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [fieldValues, setFieldValues] = useState([]);
 
@@ -123,7 +119,7 @@ const ProductCategory = () => {
     <>
       <div className="content-breadcrumps-below-content-height w-100 placeholder-glow">
         <div className="w-100 py-4 h-100">
-          <div className="card  rounded-4 border-0 category-card-height h-100 overflow-scroll">
+          <div className="card  rounded-4 border-0 category-card-height h-100 overflowY">
             <div className="card-body p-4">
               <h5 className="category-card-title">Product Category</h5>
 
@@ -231,24 +227,9 @@ const ProductCategory = () => {
                   </div>
                 </div>
 
-                {noDataFound && isErrorStatus && (
-                  <div
-                    className="alert alert-primary fesibility-fontSize fw-bold"
-                    role="alert"
-                  >
-                    Sorry! We don’t have any products/services that match your
-                    requirements
-                  </div>
-                )}
+                
 
-                {errorMessage && (
-                  <div
-                    className="alert alert-danger fesibility-fontSize fw-bold"
-                    role="alert"
-                  >
-                    {errorMessage}
-                  </div>
-                )}
+                
               </div>
             )}
 
