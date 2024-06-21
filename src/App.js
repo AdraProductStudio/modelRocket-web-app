@@ -4,6 +4,7 @@ import AuthPage from "./Component/AuthPage";
 import ConsumerPreferenceLayout from "../src/Component/Reusables/ConsumerPreferenceLayout";
 import { Toaster } from "react-hot-toast";
 import ProductCategory from "./Component/Reusables/ProductCategory";
+import AdminForm from "./Component/AdminForm";
 
 function App() {
   return (
@@ -12,15 +13,11 @@ function App() {
       <Routes>
         <Route path="/" element={<AuthPage />}>
           <Route index exact element={<Home />} />
-          <Route
-              path="consumer_preference"
-              exact
-              element={<ConsumerPreferenceLayout />}
-            />
+          <Route path="admin" element={<AdminForm />} />      
 
-          <Route path="category">
-            <Route index exact element={<ProductCategory />} />      
-          </Route>
+          <Route path="consumer_preference" exact element={<ConsumerPreferenceLayout />} />
+
+          <Route path="category" element={<ProductCategory />} />      
 
           <Route path="*" element={<h1>404 Not Found</h1>} />
         </Route>

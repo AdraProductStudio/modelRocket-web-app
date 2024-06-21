@@ -8,7 +8,7 @@ import { Tooltip } from "react-tooltip";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
-  const [initialGlow, setInitialGlow] = useState(false);  
+  const [initialGlow, setInitialGlow] = useState(false);
   const [productCategory, setProductCategory] = useState([]);
 
   const [formData, setFormData] = useState({});
@@ -30,7 +30,7 @@ const Home = () => {
   );
 
   const [btnLoading, setBtnLoading] = useState(false);
-  
+
 
   const [mainCreteriaContent, setMainCreteriaContent] = useState(false);
 
@@ -60,7 +60,7 @@ const Home = () => {
 
   const redirectCategoryPage = (id) => {
     setProductCategory([]);
-    localStorage.setItem("client_id", id);    
+    localStorage.setItem("client_id", id);
 
     axiosInstance
       .post("/get_product_categories", {
@@ -80,8 +80,11 @@ const Home = () => {
       });
   };
 
+
+
+
   const handleOnChange = (productId) => {
-  
+
     localStorage.setItem("product_id", productId);
     const selectedCategory = productCategory.find(
       (category) => category.id === parseInt(productId)
@@ -104,15 +107,15 @@ const Home = () => {
       (category) => category.id === parseInt(productId)
     );
 
-   
-    
+
+
     if (selectedCategory) {
       if (
         selectedCategory.feasibility &&
         selectedCategory.feasibility.length > 0
       ) {
         handleShow();
-      
+
       } else {
         pageNavigate("/consumer_preference");
       }
@@ -149,7 +152,7 @@ const Home = () => {
       if (currentQuestionIndex < currentQuestions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
       } else {
-        
+
         setBtnLoading(true);
 
         const getAttributesParamters = {
@@ -160,7 +163,7 @@ const Home = () => {
           .post("/get_attributes", getAttributesParamters)
           .then((response) => {
             if (response.data.error_code === 200) {
-              
+
               setBtnLoading(false);
               if (response.data.data.main_criteria_pairs.length > 0) {
                 handleClose();
@@ -176,7 +179,7 @@ const Home = () => {
           .catch((err) => {
             toast.error(err);
           })
-         
+
       }
     }
   };
@@ -188,32 +191,52 @@ const Home = () => {
   };
 
   const validateQuestion = (question) => {
-    const userInput = formData[question.id];
-    switch (question.bountary_type) {
-      case "in":
-        if (!question.bountary_value.includes(userInput)) {
-          return "Sorry, we don't provide products or services that meet your requirements.";
-        }
-        break;
-      case ">":
-        if (parseFloat(userInput) <= parseFloat(question.bountary_value[0])) {
-          return `Value must be greater than ${question.bountary_value[0]}`;
-        }
-        break;
-      case "<":
-        if (parseFloat(userInput) >= parseFloat(question.bountary_value[0])) {
-          return `Value must be less than ${question.bountary_value[0]}`;
-        }
-        break;
-      case "value":
-        if (!question.bountary_value.includes(userInput)) {
-          return `Valid values are: ${question.bountary_value.join(", ")}`;
-        }
-        break;
-      default:
-        break;
+    const userInput = formData[question.id]; 
+    
+    if(userInput==="" || userInput===undefined){
+      return "Inputs should not be empty"
+    }else{
+      switch (question.bountary_type) {
+        case "in":
+          if (!question.bountary_value.includes(userInput)) {
+            return "Sorry, we don't provide products or services that meet your requirements.";
+          }
+          break;
+        case "notin":
+          if (question.bountary_value.includes(userInput)) {
+            return "Sorry, we don't provide products or services that meet your requirements.";
+          }
+          break;
+        case ">":
+          if (parseFloat(userInput) <= parseFloat(question.bountary_value[0])) {
+            return `Value must be greater than ${question.bountary_value[0]}`;
+          }
+          break;
+        case "<":
+          if (parseFloat(userInput) >= parseFloat(question.bountary_value[0])) {
+            return `Value must be less than ${question.bountary_value[0]}`;
+          }
+          break;
+        case ">=":
+          if (parseFloat(userInput) < parseFloat(question.bountary_value[0])) {
+            return `Value must be greater than or equal to ${question.bountary_value[0]}`;
+          }
+          break;
+        case "<=":
+          if (parseFloat(userInput) > parseFloat(question.bountary_value[0])) {
+            return `Value must be less than or equal to ${question.bountary_value[0]}`;
+          }
+          break;
+        case "value":
+          if (!question.bountary_value.includes(userInput)) {
+            return `Valid values are: ${question.bountary_value.join(", ")}`;
+          }
+          break;
+        default:
+          break;
+      }
+      return null;
     }
-    return null;
   };
 
   const renderQuestionInputs = () => {
@@ -311,39 +334,39 @@ const Home = () => {
               </div>
             </div>
           </div>
-        :
-           products.map((product) => (
-              <div key={product.id} className="col-12 col-sm-6 col-lg-3">
-                <div className="card rounded-4 border-0 h-100">
-                  <div className="card-body">
-                    <div className="py-3">
-                      <img
-                        src="https://cdn.matsuritech.com/client/default_client.jpeg"
-                        height={200}
-                        className="rounded-4 w-100"
-                        alt="..."
-                      />
-                    </div>
-                    <h5 className="card-title">{product.name}</h5>
-                    <p className="card-text">{product.desc}</p>
+          :
+          products.map((product) => (
+            <div key={product.id} className="col-12 col-sm-6 col-lg-3">
+              <div className="card rounded-4 border-0 h-100">
+                <div className="card-body">
+                  <div className="py-3">
+                    <img
+                      src="https://cdn.matsuritech.com/client/default_client.jpeg"
+                      height={200}
+                      className="rounded-4 w-100"
+                      alt="..."
+                    />
                   </div>
-                  <div className="card-footer py-3 bg-white rounded-4">
-                    <button
-                      type="button"
-                      className="btn btn-primary text-center w-100"
-                      onClick={() => {
-                        localStorage.removeItem("product_id");
-                        redirectCategoryPage(product.id)
-                      }}
-                      data-bs-toggle="modal"
-                      data-bs-target={`#exampleModalToggle-${product.id}`}
-                    >
-                      View consumer experience
-                    </button>
-                  </div>
+                  <h5 className="card-title">{product.name}</h5>
+                  <p className="card-text">{product.desc}</p>
+                </div>
+                <div className="card-footer py-3 bg-white rounded-4">
+                  <button
+                    type="button"
+                    className="btn btn-primary text-center w-100"
+                    onClick={() => {
+                      localStorage.removeItem("product_id");
+                      redirectCategoryPage(product.id)
+                    }}
+                    data-bs-toggle="modal"
+                    data-bs-target={`#exampleModalToggle-${product.id}`}
+                  >
+                    View consumer experience
+                  </button>
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
       </div>
 
       {/* Modals */}
@@ -386,12 +409,12 @@ const Home = () => {
                   <option value="">select service</option>
                   {productCategory.length > 0
                     ? productCategory.map((category, index) => {
-                        return (
-                          <option value={category.id} key={index}>
-                            {category.name}
-                          </option>
-                        );
-                      })
+                      return (
+                        <option value={category.id} key={index}>
+                          {category.name}
+                        </option>
+                      );
+                    })
                     : null}
                 </select>
               </div>
@@ -423,7 +446,7 @@ const Home = () => {
         <Modal.Body>
           {mainCreteriaContent ? (
             <label className="form-label">
-              <img src={require("../Component/assets/businessDeal.png")} width={270} height={220} className="rounded mx-auto d-block mb-4" alt="..."/>
+              <img src={require("../Component/assets/businessDeal.png")} width={270} height={220} className="rounded mx-auto d-block mb-4" alt="..." />
               Thank you for answering our questions. Someone from our team will
               be in touch with you shortly!
             </label>
@@ -457,6 +480,7 @@ const Home = () => {
           </Modal.Footer>
         )}
       </Modal>
+
     </div>
   );
 };

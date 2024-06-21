@@ -64,7 +64,10 @@ code {
 .nav-height{
   height: var(--nav-height);
   background-color: var(--nav-bg-color);
+}
 
+.admin-page-content-height{
+  height: calc(100vh - var(--nav-height));
 }
 
 .content-body-height{
@@ -76,6 +79,18 @@ code {
   height:var(--breadcrumps-height);
 }
 
+/* Homepage login */
+
+.password-container {
+  position: relative;
+}
+
+.eye-icon {
+  position: absolute;
+  bottom: 0.26rem;
+  right: 1rem;
+  cursor: pointer;
+}
 
 .content-breadcrumps-below-content-height{
   height:calc(var(--main-body-height) - var(--breadcrumps-height));
@@ -173,4 +188,15 @@ code {
 
 .tooltipWidth{
   width: 22rem !important;
+}
+
+.edit-btn{
+  position: absolute;
+  top: -.1rem;
+  right: 0;
+}
+.criteria-edit-btn{
+  position: absolute;
+  top: .5rem;
+  right: 1.5rem;
 }
