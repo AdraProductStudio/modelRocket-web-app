@@ -41,6 +41,18 @@ export const Navbar = () => {
         }
     };
 
+    const handleLogin = () =>{
+        if(localStorage.getItem("isAdmin")){
+            pageRender("/admin")
+        }else{
+            setInputDetails({
+                username: "",
+                password: "",
+            })
+            setError(false)
+        }
+    }
+
 
     return (
         <>
@@ -50,14 +62,16 @@ export const Navbar = () => {
                         <img src={Logo} alt="Logo" className='navLogo ' />
                     </a>
                     <div>
-                        <button className='btn btn-primary' data-bs-toggle="modal" data-bs-target="#loginModal" onClick={()=>{
-                            setInputDetails({
-                                username: "",
-                                password: "",
-                            })
+                    {
+                        window.location.pathname === "/admin" ?
+                        <button className='btn btn-primary' onClick={()=>{
+                            localStorage.removeItem("isAdmin")
                             setError(false)
-                        }}>Configure</button>
-
+                            pageRender("/")
+                        }}>Logout</button>
+                        :
+                        <button className='btn btn-primary' data-bs-toggle={localStorage.getItem("isAdmin") ? "" :"modal"} data-bs-target={localStorage.getItem("isAdmin") ? "" :"#loginModal"} onClick={handleLogin}>Configure</button>
+                    }
                     </div>
                 </div>
             </nav>

@@ -260,7 +260,7 @@ const AdminForm = () => {
             const res = await axiosInstance.post("/update_feasibility", sendingData[0])
             if (res.data.error_code === 200) {
                 setUpdateLoading(false)
-                pageRender("/")
+                toast.success("Updated successfully")
             } else {
                 setUpdateLoading(false)
                 toast.error(res.data.message)
@@ -284,7 +284,6 @@ const AdminForm = () => {
             <div className="card h-100 overflowY overflowX py-3">
                 <div className="w-100 p-3">
                     <button className="btn btn-outline-secondary d-flex align-items-center gap-2 ms-1" onClick={() => {
-                        localStorage.removeItem("isAdmin")
                         pageRender("/")
                     }}>
                         <IoChevronBackCircle className="fs-5" /> Back
