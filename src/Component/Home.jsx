@@ -148,11 +148,16 @@ const Home = () => {
     const currentQuestion = currentQuestions[currentQuestionIndex];
     const error = validateQuestion(currentQuestion);
     if (error) {
-      toast(error, {
-        icon: (
-          <IoIosInformationCircleOutline className="infoToast me-1" />
-        ),
-      })
+      if(error.type==="empty"){
+        toast.error("Input should not be empty")
+      }else{
+        toast(error, {
+          icon: (
+            <IoIosInformationCircleOutline className="infoToast me-1" />
+          ),
+        })
+      }
+     
     } else {
       if (currentQuestionIndex < currentQuestions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -199,7 +204,7 @@ const Home = () => {
     const userInput = formData[question.id];
 
     if (userInput === "" || userInput === undefined) {
-      return "Inputs should not be empty"
+      return {err:"Inputs should not be empty",type:"empty"}
     } else {
       switch (question.bountary_type) {
         case "in":
