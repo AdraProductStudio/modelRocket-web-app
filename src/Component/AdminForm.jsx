@@ -430,12 +430,12 @@ const AdminForm = () => {
                                                     </div>
 
                                                     <div className="col-6">
-                                                        <p className='fw-bold mb-0'>Bountary type:</p>
-                                                        <p> {v.bountary_type}</p>
+                                                        <p className='fw-bold mb-0'>Type:</p>
+                                                        <p> {v.bountary_type==="value" ? "drop-down" : v.bountary_type}</p>
                                                     </div>
 
                                                     <div className="col-6">
-                                                        <p className='fw-bold mb-0'>Bountary value: </p>
+                                                        <p className='fw-bold mb-0'>Value: </p>
                                                         <div className="row gy-2">
                                                             {v.bountary_value ?
                                                                 v.bountary_value.map((v, i) => {
