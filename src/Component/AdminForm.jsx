@@ -12,6 +12,7 @@ const AdminForm = () => {
     const [feasabilityData, setFeasabilityData] = useState([]);
     const [criteriaData, setCriteriaData] = useState([]);
     const [criteriaDataDupli, setCriteriaDataDupli] = useState([]);
+    const [originalBoundaryType, setOriginalBoundaryType] = useState([]);
     const [editingFeadibilityData, setEditingFeadibilityData] = useState({});
     const [editingFeadibilityIndex, setEditingFeadibilityIndex] = useState(Number);
     const [glowOne, setGlowOne] = useState(false);
@@ -142,6 +143,7 @@ const AdminForm = () => {
     const handleFeasibilityEdit = (index, value) => {
         setEditingFeadibilityIndex(index);
         setEditingFeadibilityData(value);
+        setOriginalBoundaryType(value.bountary_type);
 
         const joinBountryValue = value.bountary_value.join(',');
 
@@ -178,8 +180,8 @@ const AdminForm = () => {
         if (modalName === "feasibility") {
             if (question !== "" && boundaryValue !== "") {
                 const bountryValueSplit = boundaryValue.split(',');
-                const checkingIfAnythingIsEmpty = bountryValueSplit.filter((v)=>{
-                    return v!=='' ? v.trim() : null
+                const checkingIfAnythingIsEmpty = bountryValueSplit.filter((v) => {
+                    return v !== '' ? v.trim() : null
                 })
 
                 const checkbountryValueisFinite = checkingIfAnythingIsEmpty.filter((v) => {
@@ -431,7 +433,7 @@ const AdminForm = () => {
 
                                                     <div className="col-6">
                                                         <p className='fw-bold mb-0'>Type:</p>
-                                                        <p> {v.bountary_type==="value" ? "drop-down" : v.bountary_type}</p>
+                                                        <p> {v.bountary_type === "value" ? "drop-down" : v.bountary_type}</p>
                                                     </div>
 
                                                     <div className="col-6">
@@ -539,17 +541,26 @@ const AdminForm = () => {
                                     </div>
 
                                     <div className="mb-3">
-                                        <label htmlFor="exampleInputBountry" className="form-label">Bountary value</label>
-                                        <textarea rows={4} className={`form-control ${boundaryValue === "" && validation ? "border-danger" : ""}`} id="exampleInputBountry" value={boundaryValue} onChange={(e) => setBoundaryValue(e.target.value)} />
-                                        <p className='text-muted'>
-                                            <span className='px-1 '>Ex:</span>
-                                            seperated by "," like 123,456
-                                        </p>
+                                        <label htmlFor="exampleInputBountry" className="form-label">Value</label>
+                                        {
+                                            originalBoundaryType === "value" || originalBoundaryType === "in" ?
+                                                <>
+                                                    <textarea rows={4} className={`form-control ${boundaryValue === "" && validation ? "border-danger" : ""}`} id="exampleInputBountry" value={boundaryValue} onChange={(e) => setBoundaryValue(e.target.value)} />
+                                                    <p className='text-muted'>
+                                                        <span className='px-1 '>Ex:</span>
+                                                        seperated by "," like 123,456
+                                                    </p>
+                                                </>
+
+                                            :
+                                                <input type="number" className={`form-control ${boundaryValue === "" && validation ? "border-danger" : ""}`} id="exampleInputBountry" value={boundaryValue} onChange={(e) => setBoundaryValue(e.target.value)}/>
+                                        }
+
                                     </div>
 
                                     {questionType === "numeric" ?
                                         <div className="mb-3">
-                                            <label htmlFor="exampleInputBountry" className="form-label">Bountary type</label>
+                                            <label htmlFor="exampleInputBountry" className="form-label">Type</label>
                                             <select className={`form-select w-50 ${bountryType === "" && validation ? "border-danger" : ""}`} value={bountryType} onChange={(e) => setBountryType(e.target.value)}>
                                                 {dynamicBountryType()}
                                             </select>
