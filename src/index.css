@@ -200,3 +200,8 @@ code {
   top: .5rem;
   right: 1.5rem;
 }
+
+.infoToast{
+  color: #65a3ff;
+  font-size: 4rem;
+}

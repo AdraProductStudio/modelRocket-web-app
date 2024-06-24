@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Button, Modal } from "react-bootstrap";
 import { FaInfoCircle } from "react-icons/fa";
 import { Tooltip } from "react-tooltip";
+import { IoIosInformationCircleOutline } from "react-icons/io";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -147,7 +148,11 @@ const Home = () => {
     const currentQuestion = currentQuestions[currentQuestionIndex];
     const error = validateQuestion(currentQuestion);
     if (error) {
-      toast.error(error);
+      toast(error, {
+        icon: (
+          <IoIosInformationCircleOutline className="infoToast me-1" />
+        ),
+      })
     } else {
       if (currentQuestionIndex < currentQuestions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -191,11 +196,11 @@ const Home = () => {
   };
 
   const validateQuestion = (question) => {
-    const userInput = formData[question.id]; 
-    
-    if(userInput==="" || userInput===undefined){
+    const userInput = formData[question.id];
+
+    if (userInput === "" || userInput === undefined) {
       return "Inputs should not be empty"
-    }else{
+    } else {
       switch (question.bountary_type) {
         case "in":
           if (!question.bountary_value.includes(userInput)) {
@@ -209,27 +214,27 @@ const Home = () => {
           break;
         case ">":
           if (parseFloat(userInput) <= parseFloat(question.bountary_value[0])) {
-            return `Value must be greater than ${question.bountary_value[0]}`;
+            return `Sorry, we don't provide products or services that meet your requirements.`;
           }
           break;
         case "<":
           if (parseFloat(userInput) >= parseFloat(question.bountary_value[0])) {
-            return `Value must be less than ${question.bountary_value[0]}`;
+            return `Sorry, we don't provide products or services that meet your requirements.`;
           }
           break;
         case ">=":
           if (parseFloat(userInput) < parseFloat(question.bountary_value[0])) {
-            return `Value must be greater than or equal to ${question.bountary_value[0]}`;
+            return `Sorry, we don't provide products or services that meet your requirements.`;
           }
           break;
         case "<=":
           if (parseFloat(userInput) > parseFloat(question.bountary_value[0])) {
-            return `Value must be less than or equal to ${question.bountary_value[0]}`;
+            return `Sorry, we don't provide products or services that meet your requirements.`;
           }
           break;
         case "value":
           if (!question.bountary_value.includes(userInput)) {
-            return `Valid values are: ${question.bountary_value.join(", ")}`;
+            return `Sorry, we don't provide products or services that meet your requirements.`;
           }
           break;
         default:
