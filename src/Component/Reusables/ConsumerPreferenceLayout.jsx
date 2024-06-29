@@ -322,7 +322,7 @@ const ConsumerPreferenceLayout = () => {
               
               <div className="card h-100 border-0 shadow-sm rounded-4 d-flex flex-wrap p-2">
                 {/* secion one  */}
-                <div className="h-50 py-1">
+                <div className="h-50">
                   <div className="card h-100 overflowY">
                     <h6 className="card-title m-2">
                       Consumer weights
@@ -332,7 +332,7 @@ const ConsumerPreferenceLayout = () => {
                     </h6>
 
 
-                    <div className="card-body my-2">
+                    <div className="card-body">
                       {
                         viewCharts ?
                           Object.keys(graphData).length > 0 ?
