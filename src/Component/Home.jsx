@@ -266,7 +266,7 @@ const Home = () => {
           <input
             type="number"
             className={`form-control ${error ? "is-invalid" : ""}`}
-            placeholder={question.question}
+            placeholder="Please enter response"
             aria-label={question.question}
             aria-describedby="basic-addon2"
             value={formData[question.id] || ""}
@@ -295,7 +295,7 @@ const Home = () => {
           <input
             type="text"
             className={`form-control ${error ? "is-invalid" : ""}`}
-            placeholder={question.question}
+            placeholder="Please enter response"
             aria-label={question.question}
             aria-describedby="basic-addon2"
             value={formData[question.id] || ""}
