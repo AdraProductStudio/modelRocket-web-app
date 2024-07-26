@@ -239,7 +239,7 @@ const ConsumerPreferenceLayout = () => {
                     </div>
                   </div>
 
-                  <div className="range-bar-container slidecontainer  px-5">
+                  <div className="range-bar-container slidecontainer  px-4">
                     <>
                       {initialGlow ? (
                         dummySlider.map((v, i) => {
@@ -265,7 +265,7 @@ const ConsumerPreferenceLayout = () => {
                           );
                         })
                       ) : (
-                        <div className="row h-100 justify-content-center align-items-center px-3">
+                        <div className="row h-100 justify-content-center align-items-center px-3 ">
                           <Slider
                             ref={(slider) => {
                               sliderRef = slider;
@@ -296,7 +296,7 @@ const ConsumerPreferenceLayout = () => {
                                     }
                                   />
                                 </div>
-                                <p className="col p-2 mb-0 sliderText text-break">
+                                <p className="col py-2 px-0 mb-0 sliderText text-break">
                                   {pair[1]}
                                 </p>
                               </div>
