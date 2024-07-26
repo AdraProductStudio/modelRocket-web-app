@@ -24,6 +24,7 @@ const AuthPage = () => {
   const removeLocalStorage = () => {
     localStorage.removeItem("client_id")
     localStorage.removeItem("product_id")
+    localStorage.removeItem("service_id")
     localStorage.removeItem("isAdmin")
   }
   return (

@@ -5,29 +5,24 @@ import { useNavigate } from 'react-router-dom';
 import { IoChevronBackCircle } from 'react-icons/io5';
 import toast from 'react-hot-toast';
 
-const AdminForm = () => {
+const AdminForm1 = () => {
     const [clientDetails, setClietDetails] = useState([]);
     const [productDetails, setProductDetails] = useState([]);
     const [sendingData, setSendingData] = useState([]);
     const [feasabilityData, setFeasabilityData] = useState([]);
-    const [attributeData, setattributeData] = useState([]);
-    const [attributeDataDupli, setattributeDataDupli] = useState([]);
+    const [criteriaData, setCriteriaData] = useState([]);
+    const [criteriaDataDupli, setCriteriaDataDupli] = useState([]);
     const [originalBoundaryType, setOriginalBoundaryType] = useState([]);
-    const [services, setServices] = useState([]);
     const [editingFeadibilityData, setEditingFeadibilityData] = useState({});
     const [editingFeadibilityIndex, setEditingFeadibilityIndex] = useState(Number);
-    const [sevicesData, setServicesData] = useState(false);
-    const [glowOne, setglowOne] = useState(false);
-    const [glowTwo, setglowTwo] = useState(false);
-    const [glowThree, setglowThree] = useState(false);
-    const [noDataAvailable, setNoDataAvailable] = useState(false);
+    const [glowOne, setGlowOne] = useState(false);
+    const [glowTwo, setGlowTwo] = useState(false);
     const [validation, setvalidation] = useState(false);
     const [updateLoading, setUpdateLoading] = useState(false)
     const feasabilityPlaceholder = [1, 2];
     const bountaryValueplaceholder = [1, 2, 3, 4];
     const criteriaPlaceholder = [1, 2, 3, 4];
     const pageRender = useNavigate();
-
 
     const [question, setQuestion] = useState("");
     const [bountryType, setBountryType] = useState("");
@@ -36,15 +31,13 @@ const AdminForm = () => {
     const [toolTip, serToolTip] = useState("")
 
     const [clientId, setClientId] = useState(Number);
+    const [serviceId, setServiceId] = useState(Number)
     const [productId, setProductId] = useState(Number);
-    const [serviceId, setServiceId] = useState(Number);
-
 
     //api request function
     const getClients = async () => {
         try {
             const res = await axiosInstance.get("/get_clients")
-
             if (res.data.error_code === 200) {
                 setClietDetails(res.data.data)
             }
@@ -53,27 +46,7 @@ const AdminForm = () => {
         }
     }
 
-    const handleGetServices = async (Clientid) => {
-        try {
-            const obj = {
-                client_id: Clientid
-            }
-
-            const res = await axiosInstance.post("/get_services", obj)
-
-            if (res.data.error_code === 200) {
-                setServices(res.data.data)
-                setglowOne(false)
-            } else {
-                setglowOne(false)
-            }
-
-        } catch (err) {
-            console.log(err)
-        }
-    }
-
-    const handleGetProducts = async (serviceId) => {
+    const handleGetProducts = async (clientId, serviceId) => {
         try {
             const obj = {
                 client_id: clientId,
@@ -81,12 +54,12 @@ const AdminForm = () => {
             }
 
             const res = await axiosInstance.post("/get_parent_products", obj)
+
             if (res.data.error_code === 200) {
-                console.log(res.data.data)
                 setProductDetails(res.data.data)
-                setglowTwo(false)
+                setGlowOne(false)
             } else {
-                setglowTwo(false)
+                setGlowOne(false)
             }
 
         } catch (err) {
@@ -94,30 +67,25 @@ const AdminForm = () => {
         }
     }
 
-    const handleGetFesability = async (productid) => {
+    const handleGetFesability = async (product_id, client_id, service_id) => {
         try {
             const obj = {
-                client_id: clientId,
-                service_id: serviceId,
-                product_id: productid
+                client_id: client_id,
+                service_id: service_id,
+                product_id: product_id
             }
 
+            console.log(obj)
             const res = await axiosInstance.post("/get_product_feasibility", obj)
             if (res.data.error_code === 200) {
                 if (res.data.data.length > 0) {
                     setSendingData(res.data.data)
                     setFeasabilityData(res.data.data[0].feasibility)
-                    setattributeData(res.data.data[0].attribute)
-                    setattributeDataDupli(res.data.data[0].attribute)
-                    setglowThree(false)
-
-                    if(res.data.data[0].feasibility.length === 0 && res.data.data[0].attribute.length === 0){
-                        setNoDataAvailable(true)
-                    }else{
-                        setNoDataAvailable(false)
-                    }
+                    setCriteriaData(res.data.data[0].attribute)
+                    setCriteriaDataDupli(res.data.data[0].attribute)
+                    setGlowTwo(false)
                 } else {
-                    setglowThree(false)
+                    setGlowTwo(false)
                 }
             }
         } catch (err) {
@@ -128,31 +96,27 @@ const AdminForm = () => {
 
     //onChange functions
     const handleClient = (e) => {
+
         if (e.target.value !== '') {
-            setglowOne(true)
-            setServicesData(false)
+            setGlowOne(true)
             setFeasabilityData([]);
-            setattributeData([]);
+            setCriteriaData([]);
 
-            handleGetServices(e.target.value)
-            setClientId(e.target.value);
-        }
-    }
+            const myArray = e.target.value.split(",")
 
-    const handleServices = (e) => {
-        if (e.target.value !== '') {
-            setglowTwo(true)
-            handleGetProducts(e.target.value);
-            setServiceId(e.target.value)
-            setServicesData(true)
+
+            setClientId(parseInt(myArray[0]));
+            setServiceId(parseInt(myArray[1]))
+
+            handleGetProducts(parseInt(myArray[0]), parseInt(myArray[1]))
         }
     }
 
     const handleProducts = (e) => {
         if (e.target.value !== '') {
-            setglowThree(true)
+            setGlowTwo(true)
+            handleGetFesability(e.target.value, clientId, serviceId)
             setProductId(e.target.value)
-            handleGetFesability(e.target.value)
         }
     }
     //
@@ -202,7 +166,7 @@ const AdminForm = () => {
     }
 
     const handleCriteriaEdit = () => {
-        return attributeDataDupli.map((v, i) => {
+        return criteriaDataDupli.map((v, i) => {
             return <>
                 <div className="col-6">
                     <input type="text" value={v.attribute_name} className={`form-control ${v.attribute_name === "" && validation ? "border-danger" : ""}`} onChange={(e) => handleCriteriaModalIp(e, v.attribute_id)} required />
@@ -212,11 +176,11 @@ const AdminForm = () => {
     }
 
     const handleCriteriaModalIp = (event, criteriaId) => {
-        var newCriteriaArray = attributeDataDupli.map((v) => {
+        var newCriteriaArray = criteriaDataDupli.map((v) => {
             return v.attribute_id === criteriaId ? { ...v, attribute_name: event.target.value } : v
         })
 
-        setattributeDataDupli(newCriteriaArray)
+        setCriteriaDataDupli(newCriteriaArray)
     }
 
     const handleSaveChanges = (modalName) => {
@@ -279,15 +243,16 @@ const AdminForm = () => {
                 setvalidation(true)
             }
         } else {
-            const validateError = attributeDataDupli.filter((v) => {
-                return v.criteria_name !== ""
+            const validateError = criteriaDataDupli.filter((v) => {
+                return v.attribute_name !== ""
             })
 
-            if (validateError.length === attributeDataDupli.length) {
-                const newModifiedattributeData = { ...sendingData[0] }
-                newModifiedattributeData.attribute = attributeDataDupli
-                setSendingData([newModifiedattributeData])
-                setattributeData(attributeDataDupli)
+            if (validateError.length === criteriaDataDupli.length) {
+                const newModifiedCriteriaData = { ...sendingData[0] }
+                newModifiedCriteriaData.product_id = ""
+                newModifiedCriteriaData.attribute = criteriaDataDupli
+                setSendingData([newModifiedCriteriaData])
+                setCriteriaData(criteriaDataDupli)
 
                 document.getElementById("closeCriteria").click();
                 setvalidation(false);
@@ -298,24 +263,26 @@ const AdminForm = () => {
         }
     }
 
-
     const handleUpdate = async () => {
-        // setUpdateLoading(true)
+        setUpdateLoading(true)
         try {
-            console.log(sendingData)
-            // const res = await axiosInstance.post("/update_feasibility", sendingData[0])
-            // if (res.data.error_code === 200) {
-            //     setUpdateLoading(false)
-            //     toast.success("Updated successfully")
-            // } else {
-            //     setUpdateLoading(false)
-            //     toast.error(res.data.message)
-            // }
+            const newUpdationData = { ...sendingData[0] }
+            newUpdationData.product_id = 0
+
+            console.log(newUpdationData,"newUpdationData")
+
+            const res = await axiosInstance.post("/update_feasibility", newUpdationData)
+            if (res.data.error_code === 200) {
+                setUpdateLoading(false)
+                toast.success("Updated successfully")
+            } else {
+                setUpdateLoading(false)
+                toast.error(res.data.message)
+            }
         } catch (err) {
             console.log(err)
         }
     }
-
 
     useEffect(() => {
         if (localStorage.getItem("isAdmin") !== null) {
@@ -329,7 +296,7 @@ const AdminForm = () => {
         <div className="admin-page-content-height py-4 placeholder-glow">
             <div className="card h-100 overflowY overflowX py-3">
                 <div className="w-100 p-3">
-                    <button className="btn btn-outline-secondary d-flex align-items-center gap-2 ms-1 py-1 px-3" onClick={() => {
+                <button className="btn btn-outline-secondary d-flex align-items-center gap-2 ms-1 py-1 px-2" onClick={() => {
                         pageRender("/")
                     }}>
                         <IoChevronBackCircle className="fs-5" /> Back
@@ -346,7 +313,7 @@ const AdminForm = () => {
                                         <option value="">select client</option>
                                         {
                                             clientDetails.map((v, i) => {
-                                                return <option value={v.id} key={i}>{v.name}</option>
+                                                return <option value={[v.id, v.services[0].id]} key={i}>{v.name}</option>
                                             })
                                         }
                                     </select>
@@ -363,11 +330,11 @@ const AdminForm = () => {
                                             </>
                                             :
                                             <>
-                                                <label htmlFor="clientName" className="form-label fw-bold" aria-label="Default select example">Services</label>
-                                                <select className='form-select' id="clientName" onChange={handleServices}>
-                                                    <option value="">select services</option>
+                                                <label htmlFor="clientName" className="form-label fw-bold" aria-label="Default select example">Product name</label>
+                                                <select className='form-select' id="clientName" onChange={handleProducts}>
+                                                    <option value="">select product</option>
                                                     {
-                                                        services.map((v, i) => {
+                                                        productDetails.map((v, i) => {
                                                             return <option value={v.id} key={i}>{v.name}</option>
                                                         })
                                                     }
@@ -375,42 +342,13 @@ const AdminForm = () => {
                                             </>
                                     }
                                 </div>
-
-                                <div className="col-6 mb-3">
-                                    {
-                                        sevicesData ?
-                                            glowTwo ?
-                                                <>
-                                                    <label htmlFor="clientName" className="form-label placeholder py-2 pb-3 w-50 rounded" aria-label="Default select example"></label>
-                                                    <select className='form-select placeholder py-4=3 w-100 rounded' id="clientName" >
-
-                                                    </select>
-                                                </>
-                                                :
-                                                <>
-                                                    <label htmlFor="clientName" className="form-label fw-bold" aria-label="Default select example">Product name</label>
-                                                    <select className='form-select' id="clientName" onChange={handleProducts}>
-                                                        <option value="">select product</option>
-                                                        {
-                                                            productDetails.map((v, i) => {
-                                                                return <option value={v.id} key={i}>{v.name}</option>
-                                                            })
-                                                        }
-                                                    </select>
-                                                </>
-                                            :
-                                            null
-                                    }
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-
-
                 {
-                    glowThree ?
+                    glowTwo ?
                         <>
                             <div className="p-3">
                                 <div className="card">
@@ -474,7 +412,6 @@ const AdminForm = () => {
                                                             </div>
                                                         </div>
                                                     </div>
-
 
                                                 })
                                             }
@@ -543,21 +480,21 @@ const AdminForm = () => {
                 }
 
                 {
-                    attributeData.length > 0 ?
+                    criteriaData.length > 0 ?
                         <div className="p-3">
                             <div className="card">
                                 <div className="card-body ">
                                     <h5 className='fw-bold'>Attributes</h5>
-                                    <div className="criteria-edit-btn">
+                                    {/* <div className="criteria-edit-btn">
                                         <button type='button' className='btn btn-primary' onClick={() => {
                                             handleCriteriaEdit()
                                             setvalidation(false)
-                                            setattributeDataDupli(attributeData)
+                                            setCriteriaDataDupli(criteriaData)
                                         }} data-bs-toggle="modal" data-bs-target="#criteriaModal"><CiEdit className='fs-5' /></button>
-                                    </div>
+                                    </div> */}
                                     <div className="row gy-3 py-4">
                                         {
-                                            attributeData.map((v, i) => {
+                                            criteriaData.map((v, i) => {
                                                 return <div className='col-12 col-md-4 col-lg-3' key={i}>
                                                     <div className="card">
                                                         <div className="card-body py-1">
@@ -565,7 +502,6 @@ const AdminForm = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-
 
                                             })
                                         }
@@ -579,20 +515,7 @@ const AdminForm = () => {
                 }
 
                 {
-                    noDataAvailable ?
-                        <div className="p-3 h-100">
-                            <div className="card h-100">
-                                <div className="card-body py-5 h-25 row align-items-center justify-content-center">
-                                    <h5 className='text-center'>No Data Found</h5>
-                                </div>
-                            </div>
-                        </div>
-                        :
-                        null
-                }
-
-                {
-                    feasabilityData.length > 0 || attributeData.length > 0 ?
+                    feasabilityData.length > 0 || criteriaData.length > 0 ?
                         <div className="d-grid gap-2 col-6 mx-auto">
                             {
                                 updateLoading ?
@@ -609,8 +532,7 @@ const AdminForm = () => {
                 }
             </div>
 
-
-            {/* feasibility modal box  */}
+            {/* feasibility modal box */}
             <div className="modal fade" id="feasibilityModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered modal-lg">
                     <div className="modal-content">
@@ -671,8 +593,7 @@ const AdminForm = () => {
                 </div>
             </div>
 
-
-            {/* criteria modal box  */}
+            {/* criteria modal box */}
             <div className="modal fade" id="criteriaModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered modal-lg">
                     <div className="modal-content">
@@ -696,4 +617,4 @@ const AdminForm = () => {
     )
 }
 
-export default AdminForm
+export default AdminForm1

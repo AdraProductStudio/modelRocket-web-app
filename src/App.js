@@ -5,23 +5,24 @@ import ConsumerPreferenceLayout from "../src/Component/Reusables/ConsumerPrefere
 import { Toaster } from "react-hot-toast";
 import ProductCategory from "./Component/Reusables/ProductCategory";
 import AdminForm from "./Component/AdminForm";
+import { DataProvider } from "./Component/CommonContext";
+import AdminForm1 from "./Component/AdminForm1";
 
 function App() {
   return (
     <BrowserRouter>
-      <Toaster />
-      <Routes>
-        <Route path="/" element={<AuthPage />}>
-          <Route index exact element={<Home />} />
-          <Route path="admin" element={<AdminForm />} />      
-
-          <Route path="consumer_preference" exact element={<ConsumerPreferenceLayout />} />
-
-          <Route path="category" element={<ProductCategory />} />      
-
-          <Route path="*" element={<h1>404 Not Found</h1>} />
-        </Route>
-      </Routes>
+      <DataProvider>
+        <Toaster />
+        <Routes>
+          <Route path="/" element={<AuthPage />}>
+            <Route index exact element={<Home />} />
+            <Route path="admin" element={<AdminForm1 />} />
+            <Route path="consumer_preference" exact element={<ConsumerPreferenceLayout />} />
+            <Route path="category" element={<ProductCategory />} />
+            <Route path="*" element={<h1>404 Not Found</h1>} />
+          </Route>
+        </Routes>
+      </DataProvider>
     </BrowserRouter>
   );
 }
