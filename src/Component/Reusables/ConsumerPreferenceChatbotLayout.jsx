@@ -8,75 +8,17 @@ import { IoPerson } from "react-icons/io5";
 import botImage from "../assets/model-rocket-bot.svg";
 
 const ConsumerPreferenceChatbotLayout = () => {
-  const [initialGlow, setInitialGlow] = useState(false);
-  const dummySlider = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-  const [sliderIndex, setSliderIndex] = useState(0); // Track slider index
   const [viewCharts, setViewCharts] = useState(false);
   const [viewGraph, setViewGraph] = useState(false);
 
-  const [mainCriteriaPairs, setMainCriteriaPairs] = useState([]);
-  const [sliderValues, setSliderValues] = useState([]);
-  let sliderRef = useRef(null);
-
-  const [apiRequest, setApiRequest] = useState({});
   const [productComparison, setProductComparison] = useState([]);
   const [showGraphSection, setShowGraphSection] = useState(false);
-
-  // Chatbot states
-
   const inputRef = useRef();
-
-  const [showChatbot, setShowChatbot] = useState(false); // change this
-  const [dotIconDropdown, setDotIconDropdown] = useState(false);
-
   const [userTextInput, setUserTextInput] = useState("");
   const [messages, setMessages] = useState([]);
-
-  const [apiToken, setapiToken] = useState(null);
-
   const [chatbotMessage, setchatbotMessage] = useState("");
-  const [isChatbotMessageAvailable, setIsChatbotMessageAvailable] =
-    useState(false);
-
   const [conversationId, setConversationId] = useState(null);
   const [init, setInit] = useState(false);
-  const [isDataLoaded, setIsDataLoaded] = useState(false); // New state to track data loading
-
-  useEffect(() => {
-    setInitialGlow(true);
-    const get_attributes = async () => {
-      const getProduct = {
-        client_id: localStorage.getItem("client_id"),
-        service_id: localStorage.getItem("service_id"),
-        product_id: localStorage.getItem("product_id"),
-      };
-
-      try {
-        await axiosInstance.post("/get_attributes", getProduct).then((res) => {
-          setInitialGlow(false);
-          setApiRequest(res.data.data);
-          setMainCriteriaPairs(res.data.data.main_criteria_pairs);
-
-          var props = {
-            client_id: localStorage.getItem("client_id"),
-            product_category_id: localStorage.getItem("product_id"),
-            requestData: res.data.data,
-          };
-
-          handleDone(props);
-        });
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    if (
-      localStorage.getItem("client_id") !== null &&
-      localStorage.getItem("product_id")
-    ) {
-      get_attributes();
-    }
-  }, []);
 
   const [randomNumber, setRandomNumber] = useState(
     Math.floor(Math.random() * (9999999999 - 1000000000 + 1)) + 1000000000
@@ -87,7 +29,6 @@ const ConsumerPreferenceChatbotLayout = () => {
     const getChatbot = async () => {
       var requiredParams = {
         client_id: localStorage.getItem("client_id"),
-        product_id: localStorage.getItem("product_id"),
         service_id: localStorage.getItem("service_id"),
         msg: userTextInput,
         flag: "init",
@@ -96,23 +37,10 @@ const ConsumerPreferenceChatbotLayout = () => {
 
       try {
         await axiosInstance
-          .post("/chatbot", requiredParams)
-          .then((response) => {
-            console.log(response);
+          .post("/chatbot_new", requiredParams)
+          .then((response) => {            
             setchatbotMessage(response.data.data.message);
             setConversationId(response.data.data.conversation_id);
-            setIsDataLoaded(true);
-
-            if (localStorage.getItem("productName") !== null &&
-                localStorage.getItem("productName") === "Windows Company" ||
-                localStorage.getItem("productName") === "TII"
-            ){
-              if(localStorage.getItem("selectedCategory") !== null){
-                setUserTextInput(localStorage.getItem("selectedCategory"))
-            }
-            }
-
-            
           })
           .catch((err) => {
             console.log(err);
@@ -125,168 +53,11 @@ const ConsumerPreferenceChatbotLayout = () => {
     getChatbot();
   }, [init]);
 
-  useEffect(() => {
-    if (isDataLoaded) {
-        handleSubmit(); // Call handleSubmit when data is loaded
-        localStorage.removeItem("selectedCategory")
-        localStorage.removeItem("productName")
-    }
-}, [isDataLoaded]);
-
-  useEffect(() => {
-    if (mainCriteriaPairs.length > 0) {
-      const defaultValues = Array(mainCriteriaPairs.length).fill(5);
-      setSliderValues(defaultValues);
-    }
-  }, [mainCriteriaPairs]);
-
-  
-
-  const convertSliderValue = (value) => {
-    switch (value) {
-      case 1:
-        return 5;
-      case 2:
-        return 4;
-      case 3:
-        return 3;
-      case 4:
-        return 2;
-      case 5:
-        return 1;
-      case 6:
-        return 1 / 2;
-      case 7:
-        return 1 / 3;
-      case 8:
-        return 1 / 4;
-      case 9:
-        return 1 / 5;
-      default:
-        return 1;
-    }
-  };
-
-  const handleSliderChange = (index, value) => {
-    // Create a copy of the current slider values
-    const newSliderValues = [...sliderValues];
-
-    // Update the value of the slider at the specified index
-    newSliderValues[index] = value;
-
-    // Update the state with the new slider values
-    setSliderValues(newSliderValues);
-
-    if (index >= Math.floor(mainCriteriaPairs.length / 2)) {
-      setShowGraphSection(true); // Show the graph section
-    }
-  };
-
   const [graphData, setGraphData] = useState({});
 
-  const handleDone = async (params) => {
-    var updatedApiRequest = {};
-    if (
-      params.client_id === undefined &&
-      params.product_category_id === undefined
-    ) {
-      updatedApiRequest = {
-        ...apiRequest,
-        user_importance: sliderValues.map(convertSliderValue),
-        filters: { criteria: "", condition: "", value1: "", value2: "" },
-      };
-
-      next();
-    } else {
-      const defaultValuesSetting = Array(
-        params.requestData.main_criteria_pairs.length
-      ).fill(1);
-      updatedApiRequest = {
-        ...params.requestData,
-        user_importance: defaultValuesSetting,
-        filters: { criteria: "", condition: "", value1: "", value2: "" },
-      };
-    }
-
-    try {
-      const response = await axiosInstance.post(
-        "/consumer_service",
-        updatedApiRequest
-      );
-
-      if (response.data.error_code === 200) {
-        setProductComparison(response.data.data.product_comparisons);
-        setGraphData(response.data.data.criteria_weights);
-      } else {
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
-
-  const handleReset = async () => {
-    setSliderIndex(0);
-    setShowGraphSection(false);
-    setViewCharts(false);
-    setViewGraph(false);
-
-    if (mainCriteriaPairs.length > 0) {
-      const defaultValues = Array(mainCriteriaPairs.length).fill(5); // Assuming default value is 5
-      setSliderValues(defaultValues);
-    }
-
-    const updatedApiRequest = {
-      ...apiRequest,
-      user_importance: Array(mainCriteriaPairs.length)
-        .fill(5)
-        .map(convertSliderValue),
-      filters: { criteria: "", condition: "", value1: "", value2: "" },
-    };
-
-    try {
-      const response = await axiosInstance.post(
-        "/consumer_service",
-        updatedApiRequest
-      );
-
-      if (response.data.error_code === 200) {
-        setProductComparison(response.data.data.product_comparisons);
-        setGraphData(response.data.data.criteria_weights);
-      } else {
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
-
-  const sliderKey = `slider-${sliderIndex}`;
-
-  const next = () => {
-    if (mainCriteriaPairs.length / 2 <= sliderIndex) {
-      setShowGraphSection(true);
-    }
-    sliderRef.slickNext();
-  };
-
-  const settings = {
-    key: sliderKey,
-    draggable: false,
-    swipeToSlide: false,
-    touchMove: false,
-    dots: false,
-    infinite: false,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    initialSlide: sliderIndex, // Use sliderIndex directly
-    afterChange: (index) => setSliderIndex(index), // Update slider index
-  };
-
-  // Chatbot
   const chatbotResponse = async (userInput, stage) => {
     var requiredParams = {
       client_id: localStorage.getItem("client_id"),
-      product_id: localStorage.getItem("product_id"),
       service_id: localStorage.getItem("service_id"),
       msg: userInput,
       flag: stage,
@@ -294,9 +65,8 @@ const ConsumerPreferenceChatbotLayout = () => {
     };
 
     try {
-      const result = await axiosInstance.post("/chatbot", requiredParams);
-      if (result.data.error_code === 200) {
-        console.log(result);
+      const result = await axiosInstance.post("/chatbot_new", requiredParams);
+      if (result.data.error_code === 200) {        
         setTimeout(() => {
           getOfferProduct();
         }, 2000);
@@ -316,7 +86,6 @@ const ConsumerPreferenceChatbotLayout = () => {
 
   const getOfferProduct = async () => {
     const requiredParams = {
-      product_id: localStorage.getItem("product_id"),
       conversation_id: conversationId,
     };
 
@@ -345,10 +114,9 @@ const ConsumerPreferenceChatbotLayout = () => {
   };
 
   const handleSubmit = async () => {
-  let input;
+    let input;
     if (!userTextInput.trim()) return;
     input = userTextInput;
-
 
     const userMessage = { text: input, user: true };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
@@ -386,7 +154,6 @@ const ConsumerPreferenceChatbotLayout = () => {
     setViewCharts(false);
     setMessages([]);
     setShowGraphSection(false);
-    setDotIconDropdown(false);
     setProductComparison([]);
     setViewGraph(false);
     chatbotResponse("", "reset");
@@ -476,17 +243,6 @@ const ConsumerPreferenceChatbotLayout = () => {
                 </div>
 
                 <div className="">
-                  {/* <div
-className="btn btn-secondary w-100 mx-1"
-onClick={handleReset}
->
-Reset
-</div>
-
-<button type="button" className="btn brand-color w-100 fw-bold" onClick={handleDone}>
-Next
-</button> */}
-
                   <div className="essence-chat-input d-flex mx-4 my-4 rounded-3">
                     <div className="d-flex justify-content-between align-items-center h-100 w-90 border px-3 rounded-3 me-0">
                       <textarea

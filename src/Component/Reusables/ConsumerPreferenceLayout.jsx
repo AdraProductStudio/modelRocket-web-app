@@ -1,14 +1,14 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {  useEffect, useRef, useState } from "react";
 import axiosInstance from "../../Services/axiosInstance";
 import { DataAnalysisGrapgh } from "./DataAnalysisGrapgh";
 import Slider from "react-slick";
 import { Tooltip } from "react-tooltip";
 import { FaInfoCircle } from "react-icons/fa";
 import ConsumerPreferenceChatbotLayout from "./ConsumerPreferenceChatbotLayout";
-import CommonContext from "../CommonContext";
+
 
 const ConsumerPreferenceLayout = () => {
-  const { productViewType } = useContext(CommonContext);
+  
 
   const [initialGlow, setInitialGlow] = useState(false);
   const dummySlider = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
@@ -211,7 +211,7 @@ const ConsumerPreferenceLayout = () => {
 
   return (
     <>
-      {productViewType.test === "Slider" ? (
+      {localStorage.getItem("layout") === "Slider" ? (
         <section className="content-breadcrumps-below-content-height content-preference-section pt-1 overflowY overflowX placeholder-glow">
           <div className="container h-100">
             <div className="row h-100">

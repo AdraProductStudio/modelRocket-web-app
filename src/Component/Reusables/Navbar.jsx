@@ -13,8 +13,7 @@ export const Navbar = () => {
         password: "",
     });
     const [showPassword, setShowPassword] = useState(false)
-    const [error, setError] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);    
 
     const pageRender = useNavigate()
 
@@ -29,8 +28,7 @@ export const Navbar = () => {
         if (inputDetails.username === "" || inputDetails.password === "") {
             setError(true);
         } else {
-            if (inputDetails.username === "matsuri" && inputDetails.password === "modelrocket"){
-                setLoading(true);
+            if (inputDetails.username === "matsuri" && inputDetails.password === "modelrocket"){                
                 setError(false); 
                 localStorage.setItem("isAdmin",true)
                 document.getElementById("closeLoginModal").click();

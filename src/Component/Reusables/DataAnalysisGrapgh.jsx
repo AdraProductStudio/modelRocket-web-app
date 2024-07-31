@@ -34,7 +34,7 @@ export function DataAnalysisGrapgh({ graphData }) {
     <Chart
       chartType="BarChart"
       width="100%"
-      height="250px"
+      height="20rem"
       data={data}
       options={options}
     />

@@ -22,6 +22,11 @@ const Home = () => {
 
   const [show, setShow] = useState(false);
 
+  const [serviceShow, setServiceShow] = useState(false);
+
+  const serviceModalClose = () => setServiceShow(false);
+  const serviceModalShow = () => setServiceShow(true);
+
   const handleClose = () => {
     setShow(false);
     setMainCreteriaContent(false);
@@ -62,33 +67,40 @@ const Home = () => {
     fetchData();
   }, []);
 
-  const redirectCategoryPage = async (id, productName) => {
-    console.log(productName);
-    localStorage.setItem("productName", productName);
-
+  const redirectCategoryPage = async (id) => {
     setProductCategory([]);
     localStorage.setItem("client_id", id.id);
+    // serviceModalShow
 
-    if (id.services.length > 0) {
+   
+
+    if (id.services.length === 1) {
       localStorage.setItem("service_id", id.services[0].id);
+      
+    } else if(id.services.length > 1){
+      // serviceModalShow()
     }
 
-    await axiosInstance
-      .post("/get_parent_products", {
-        client_id: localStorage.getItem("client_id"),
-        service_id: localStorage.getItem("service_id"),
-      })
-      .then((response) => {
-        if (response.data.error_code === 200) {
-          setProductCategory(response.data.data);
-          setFormData({});
-          setValidationErrors({});
-          setCurrentQuestions([]);
-          setCurrentQuestionIndex(0);
-        } else {
-          toast.error(response.data.message);
-        }
-      });
+    if (activeButton === "Chatbot") {
+      pageNavigate("/consumer_preference");
+    } else {
+      await axiosInstance
+        .post("/get_parent_products", {
+          client_id: localStorage.getItem("client_id"),
+          service_id: localStorage.getItem("service_id"),
+        })
+        .then((response) => {
+          if (response.data.error_code === 200) {
+            setProductCategory(response.data.data);
+            setFormData({});
+            setValidationErrors({});
+            setCurrentQuestions([]);
+            setCurrentQuestionIndex(0);
+          } else {
+            toast.error(response.data.message);
+          }
+        });
+    }
   };
 
   const handleOnChange = (productId) => {
@@ -96,10 +108,6 @@ const Home = () => {
     const selectedCategory = productCategory.find(
       (category) => category.id === parseInt(productId)
     );
-
-    console.log(selectedCategory.name);
-    if (localStorage.getItem("productName"))
-      localStorage.setItem("selectedCategory", selectedCategory.name);
 
     if (selectedCategory) {
       setCurrentQuestions(selectedCategory.feasibility);
@@ -356,6 +364,11 @@ const Home = () => {
   };
 
   const handleProductViewType = (productId, value) => {
+    if (value === "Slider") {
+      localStorage.setItem("layout", "Slider");
+    } else {
+      localStorage.setItem("layout", "Chatbot");
+    }
     setEnableViewButton(productId);
     setActiveViewTypeButton(value);
     const v = { [productId]: value, test: value };
@@ -416,11 +429,6 @@ const Home = () => {
                       Slider
                     </button>
                     <button
-                      // disabled={
-                      // product.name === "TII" || product.name === "TII-2" || product.name === "TII" || product.name === "Windows Company"
-                      // ? true
-                      // : false
-                      // }
                       className={`${
                         (activeButton && productViewType[product.id]) ===
                         "Chatbot"
@@ -435,25 +443,45 @@ const Home = () => {
                     </button>
                   </div>
                   <div className="card-footer py-3 bg-white rounded-4">
-                    <button
-                      type="button"
-                      className="btn btn-primary text-center w-100"
-                      onClick={() => {
-                        localStorage.removeItem("product_id");
-                        redirectCategoryPage(product, product.name);
-                      }}
-                      data-bs-toggle="modal"
-                      data-bs-target={`#exampleModalToggle-${product.id}`}
-                      disabled={
-                        activeButton === ""
-                          ? "disabled"
-                          : enableViewButton === product.id
-                          ? ""
-                          : "disabled"
-                      }
-                    >
-                      View consumer experience
-                    </button>
+                    {activeButton === "Slider" ? (
+                      <button
+                        type="button"
+                        className="btn btn-primary text-center w-100"
+                        onClick={() => {
+                          localStorage.removeItem("product_id");
+                          redirectCategoryPage(product, product.name);
+                        }}
+                        data-bs-toggle="modal"
+                        data-bs-target={`#exampleModalToggle-${product.id}`}
+                        disabled={
+                          activeButton === ""
+                            ? "disabled"
+                            : enableViewButton === product.id
+                            ? ""
+                            : "disabled"
+                        }
+                      >
+                        View consumer experience
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn btn-primary text-center w-100"
+                        onClick={() => {
+                          localStorage.removeItem("product_id");
+                          redirectCategoryPage(product, product.name);
+                        }}
+                        disabled={
+                          activeButton === ""
+                            ? "disabled"
+                            : enableViewButton === product.id
+                            ? ""
+                            : "disabled"
+                        }
+                      >
+                        View consumer experience
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -507,7 +535,6 @@ const Home = () => {
                             <option
                               value={category.id}
                               key={index}
-                              onClick={() => console.log(category.name)}
                             >
                               {category.name}
                             </option>
@@ -645,6 +672,28 @@ const Home = () => {
             </Button>
           </Modal.Footer>
         )}
+      </Modal>
+
+
+      <Modal
+        show={serviceShow}
+        onHide={serviceModalClose}
+        backdrop="static"
+        keyboard={false}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Modal title</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          I will not close if you click outside me. Do not even try to press
+          escape key.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={serviceModalClose}>
+            Close
+          </Button>
+          <Button variant="primary">Understood</Button>
+        </Modal.Footer>
       </Modal>
     </div>
   );
