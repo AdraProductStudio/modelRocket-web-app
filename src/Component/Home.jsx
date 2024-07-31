@@ -62,7 +62,10 @@ const Home = () => {
     fetchData();
   }, []);
 
-  const redirectCategoryPage = async (id) => {
+  const redirectCategoryPage = async (id, productName) => {
+    console.log(productName);
+    localStorage.setItem("productName", productName);
+
     setProductCategory([]);
     localStorage.setItem("client_id", id.id);
 
@@ -93,6 +96,10 @@ const Home = () => {
     const selectedCategory = productCategory.find(
       (category) => category.id === parseInt(productId)
     );
+
+    console.log(selectedCategory.name);
+    if (localStorage.getItem("productName"))
+      localStorage.setItem("selectedCategory", selectedCategory.name);
 
     if (selectedCategory) {
       setCurrentQuestions(selectedCategory.feasibility);
@@ -132,15 +139,20 @@ const Home = () => {
     };
 
     try {
-      const response = await axiosInstance.post("/get_attributes", getAttributesParamters)
+      const response = await axiosInstance.post(
+        "/get_attributes",
+        getAttributesParamters
+      );
       if (response.data.error_code === 200) {
         setBtnLoading(false);
         if (response.data.data.main_criteria_pairs.length > 0) {
           handleClose();
           pageNavigate("/consumer_preference");
         } else {
-          handleShow();
-          setMainCreteriaContent(true);
+          handleClose();
+          pageNavigate("/consumer_preference");
+          // handleShow();
+          // setMainCreteriaContent(true);
         }
       } else {
         toast.error(response.data.message);
@@ -148,7 +160,6 @@ const Home = () => {
     } catch (error) {
       toast.error(error);
     }
-
   };
 
   const handleInputChange = (e, questionId) => {
@@ -373,75 +384,81 @@ const Home = () => {
             </div>
           </div>
         ) : (
-          products.map((product) => (
-             product.name === "Toyota" ? null :
-            <div key={product.id} className="col-12 col-sm-6 col-lg-3">
-              <div className="card rounded-4 border-0 h-100">
-                <div className="card-body">
-                  <div className="py-3">
-                    <img
-                      src="https://cdn.matsuritech.com/client/default_client.jpeg"
-                      height={200}
-                      className="rounded-4 w-100"
-                      alt="..."
-                    />
+          products.map((product) =>
+            product.name === "" ? null : (
+              <div key={product.id} className="col-12 col-sm-6 col-lg-3">
+                <div className="card rounded-4 border-0 h-100">
+                  <div className="card-body">
+                    <div className="py-3">
+                      <img
+                        src="https://cdn.matsuritech.com/client/default_client.jpeg"
+                        height={200}
+                        className="rounded-4 w-100"
+                        alt="..."
+                      />
+                    </div>
+                    <h5 className="card-title">{product.name}</h5>
+                    <p className="card-text">{product.desc}</p>
                   </div>
-                  <h5 className="card-title">{product.name}</h5>
-                  <p className="card-text">{product.desc}</p>
-                </div>
-                <div className="d-flex justify-content-evenly slider-chatbot-buttons-container mb-3  mx-3">
-                  <button
-                    type="button"
-                    className={`${
-                      (activeButton && productViewType[product.id]) === "Slider"
-                        ? "btn btn-sm btn-primary w-40 viewButton"
-                        : "btn btn-sm btn-outline-secondary w-40 viewButton"
-                    }`}
-                    onClick={() => handleProductViewType(product.id, "Slider")}
-                  >
-                    Slider
-                  </button>
-                  <button
-                    disabled={
-                      product.name === "TII" || product.name === "TII-2" || product.name === "TII" || product.name === "Windows Company"
-                        ? true
-                        : false
-                    }
-                    className={`${
-                      (activeButton && productViewType[product.id]) ===
-                      "Chatbot"
-                        ? "btn btn-sm btn-primary w-40 viewButton "
-                        : "btn btn-sm btn-outline-secondary w-40 viewButton"
-                    }`}
-                    onClick={() => handleProductViewType(product.id, "Chatbot")}
-                  >
-                    Chatbot
-                  </button>
-                </div>
-                <div className="card-footer py-3 bg-white rounded-4">
-                  <button
-                    type="button"
-                    className="btn btn-primary text-center w-100"
-                    onClick={() => {
-                      localStorage.removeItem("product_id");
-                      redirectCategoryPage(product);
-                    }}
-                    data-bs-toggle="modal"
-                    data-bs-target={`#exampleModalToggle-${product.id}`}
-                    disabled={
-                      activeButton === ""
-                        ? "disabled"
-                        : enableViewButton === product.id
-                        ? ""
-                        : "disabled"
-                    }
-                  >
-                    View consumer experience
-                  </button>
+                  <div className="d-flex justify-content-evenly slider-chatbot-buttons-container mb-3 mx-3">
+                    <button
+                      type="button"
+                      className={`${
+                        (activeButton && productViewType[product.id]) ===
+                        "Slider"
+                          ? "btn btn-sm btn-primary w-40 viewButton"
+                          : "btn btn-sm btn-outline-secondary w-40 viewButton"
+                      }`}
+                      onClick={() =>
+                        handleProductViewType(product.id, "Slider")
+                      }
+                    >
+                      Slider
+                    </button>
+                    <button
+                      // disabled={
+                      // product.name === "TII" || product.name === "TII-2" || product.name === "TII" || product.name === "Windows Company"
+                      // ? true
+                      // : false
+                      // }
+                      className={`${
+                        (activeButton && productViewType[product.id]) ===
+                        "Chatbot"
+                          ? "btn btn-sm btn-primary w-40 viewButton "
+                          : "btn btn-sm btn-outline-secondary w-40 viewButton"
+                      }`}
+                      onClick={() =>
+                        handleProductViewType(product.id, "Chatbot")
+                      }
+                    >
+                      Chatbot
+                    </button>
+                  </div>
+                  <div className="card-footer py-3 bg-white rounded-4">
+                    <button
+                      type="button"
+                      className="btn btn-primary text-center w-100"
+                      onClick={() => {
+                        localStorage.removeItem("product_id");
+                        redirectCategoryPage(product, product.name);
+                      }}
+                      data-bs-toggle="modal"
+                      data-bs-target={`#exampleModalToggle-${product.id}`}
+                      disabled={
+                        activeButton === ""
+                          ? "disabled"
+                          : enableViewButton === product.id
+                          ? ""
+                          : "disabled"
+                      }
+                    >
+                      View consumer experience
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            )
+          )
         )}
       </div>
 
@@ -487,7 +504,11 @@ const Home = () => {
                     {productCategory.length > 0
                       ? productCategory.map((category, index) => {
                           return (
-                            <option value={category.id} key={index}>
+                            <option
+                              value={category.id}
+                              key={index}
+                              onClick={() => console.log(category.name)}
+                            >
                               {category.name}
                             </option>
                           );
