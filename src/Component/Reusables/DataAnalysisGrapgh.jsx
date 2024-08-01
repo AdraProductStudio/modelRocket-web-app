@@ -21,7 +21,7 @@ export function DataAnalysisGrapgh({ graphData }) {
     chartArea: {
       top: 7,
       bottom: 70, // Increase this value if labels are cut off
-      width: "80%", // Ensure the entire width is used
+      width: "50%", // Ensure the entire width is used
     },
     tooltip: {
       isHtml: true,
