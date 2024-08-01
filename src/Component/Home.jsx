@@ -74,12 +74,9 @@ const Home = () => {
 
    
 
-    if (id.services.length === 1) {
-      localStorage.setItem("service_id", id.services[0].id);
-      
-    } else if(id.services.length > 1){
-      // serviceModalShow()
-    }
+    if (id.services.length === 1) {      
+      localStorage.setItem("service_id", id.services[0].id);      
+    } 
 
     if (activeButton === "Chatbot") {
       pageNavigate("/consumer_preference");

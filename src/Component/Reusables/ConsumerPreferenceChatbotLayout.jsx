@@ -16,7 +16,10 @@ const ConsumerPreferenceChatbotLayout = () => {
   const inputRef = useRef();
   const [userTextInput, setUserTextInput] = useState("");
   const [messages, setMessages] = useState([]);
-  const [chatbotMessage, setchatbotMessage] = useState("");
+  const [chatbotMessage, setchatbotMessage] = useState({
+    timestamp: new Date(),
+    message: "",
+  });
   const [conversationId, setConversationId] = useState(null);
   const [init, setInit] = useState(false);
 
@@ -38,8 +41,11 @@ const ConsumerPreferenceChatbotLayout = () => {
       try {
         await axiosInstance
           .post("/chatbot_new", requiredParams)
-          .then((response) => {            
-            setchatbotMessage(response.data.data.message);
+          .then((response) => {
+            setchatbotMessage({
+              timestamp: new Date(),
+              message: response.data.data.message,
+            });
             setConversationId(response.data.data.conversation_id);
           })
           .catch((err) => {
@@ -66,7 +72,7 @@ const ConsumerPreferenceChatbotLayout = () => {
 
     try {
       const result = await axiosInstance.post("/chatbot_new", requiredParams);
-      if (result.data.error_code === 200) {        
+      if (result.data.error_code === 200) {
         setTimeout(() => {
           getOfferProduct();
         }, 2000);
@@ -118,10 +124,10 @@ const ConsumerPreferenceChatbotLayout = () => {
     if (!userTextInput.trim()) return;
     input = userTextInput;
 
-    const userMessage = { text: input, user: true };
+    const userMessage = { text: input, user: true, timestamp: new Date() };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
 
-    const essenceMessage = { text: "...", user: false };
+    const essenceMessage = { text: "...", user: false, timestamp: new Date() };
 
     setMessages((prevMessages) => [...prevMessages, essenceMessage]);
     setTimeout(() => {
@@ -132,7 +138,11 @@ const ConsumerPreferenceChatbotLayout = () => {
 
     const response = await chatbotResponse(input, "step");
 
-    const newEssenceMessage = { text: response, user: false };
+    const newEssenceMessage = {
+      text: response,
+      user: false,
+      timestamp: new Date(),
+    };
     setMessages((prevMessages) => [
       ...prevMessages.slice(0, -1),
       newEssenceMessage,
@@ -167,6 +177,19 @@ const ConsumerPreferenceChatbotLayout = () => {
     }
   };
 
+ 
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12; // Convert 0 to 12 for AM/PM format
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    const formattedSeconds = seconds.toString().padStart(2, '0');
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm}`;
+  };
+
   return (
     <>
       <section className="content-breadcrumps-below-content-height content-preference-section pt-1 overflowY overflowX placeholder-glow">
@@ -182,11 +205,10 @@ const ConsumerPreferenceChatbotLayout = () => {
                       Consumer preference
                       <Tooltip id="tooltip_one" className="tooltipWidth" />
                       <label className="form-label ps-2">
-                        {" "}
                         <FaInfoCircle
                           data-tooltip-id="tooltip_one"
                           data-tooltip-content="This is a representation of the consumer engagement"
-                        />{" "}
+                        />
                       </label>
                     </h4>
                     <label className="form-label mx-4">
@@ -205,8 +227,13 @@ const ConsumerPreferenceChatbotLayout = () => {
                           alt="model-rocket-bot-image"
                           className="model-rocket-bot-image"
                         />
-                        {/* <p className="ms-2">Hi! How can I help you?</p> */}
-                        <p className="ms-2">{chatbotMessage}</p>
+                        <p className="ms-2">
+                          {chatbotMessage.message}
+                          <br />
+                          <span style={{ fontSize: "11px" }}>
+                            {formatTimestamp(chatbotMessage.timestamp)}
+                          </span>
+                        </p>
                       </li>
 
                       {messages.map((message, index) => (
@@ -221,7 +248,13 @@ const ConsumerPreferenceChatbotLayout = () => {
                           >
                             {message.user ? (
                               <>
-                                <p className="me-2">{message.text}</p>
+                                <p className="me-2">
+                                  {message.text}
+                                  <br />
+                                  <span style={{ fontSize: "11px" }}>
+                                    {formatTimestamp(message.timestamp)}
+                                  </span>
+                                </p>
                                 <IoPerson className="fs-5" />
                               </>
                             ) : (
@@ -231,9 +264,18 @@ const ConsumerPreferenceChatbotLayout = () => {
                                   alt="model-rocket-bot-image"
                                   className="model-rocket-bot-image"
                                 />
-                                <p className="ms-2">{message.text}</p>
+                                <p className="ms-2">
+                                  {message.text}
+                                  <br />
+                                  <span style={{ fontSize: "11px" }}>
+                                    {formatTimestamp(message.timestamp)}
+                                  </span>
+                                </p>
                               </>
                             )}
+                            {/* <span className="timestamp">
+                              {formatTimestamp(message.timestamp)}
+                            </span> */}
                           </li>
                         </React.Fragment>
                       ))}
