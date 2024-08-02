@@ -46,7 +46,7 @@ const ConsumerPreferenceChatbotLayout = () => {
               timestamp: new Date(),
               message: response.data.data.message,
             });
-            setConversationId(response.data.data.conversation_id);
+            setConversationId(response.data.data.conversation_id);            
           })
           .catch((err) => {
             console.log(err);
@@ -94,7 +94,7 @@ const ConsumerPreferenceChatbotLayout = () => {
     const requiredParams = {
       conversation_id: conversationId,
     };
-
+    
     try {
       const response = await axiosInstance.post("/get_offer", requiredParams);
 

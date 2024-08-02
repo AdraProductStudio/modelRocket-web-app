@@ -27,6 +27,11 @@ const Home = () => {
   const serviceModalClose = () => setServiceShow(false);
   const serviceModalShow = () => setServiceShow(true);
 
+  const [productShow, setProductShow] = useState(false);
+
+  const productModalClose = () => setProductShow(false);
+  const productModalShow = () => setProductShow(true);
+
   const handleClose = () => {
     setShow(false);
     setMainCreteriaContent(false);
@@ -41,6 +46,7 @@ const Home = () => {
   );
 
   const [btnLoading, setBtnLoading] = useState(false);
+  const [viewConsumerBtnLoading, setViewConsumerBtnLoading] = useState(false);
 
   const [mainCreteriaContent, setMainCreteriaContent] = useState(false);
 
@@ -55,6 +61,7 @@ const Home = () => {
         if (response.data.error_code === 200) {
           setProducts(response.data.data);
           setInitialGlow(false);
+          localStorage.removeItem("service_id");
         } else {
           toast.error(response.data.message);
         }
@@ -67,36 +74,38 @@ const Home = () => {
     fetchData();
   }, []);
 
+  const [services, SetServices] = useState([]);
+
   const redirectCategoryPage = async (id) => {
+    setViewConsumerBtnLoading(true);
     setProductCategory([]);
     localStorage.setItem("client_id", id.id);
-    // serviceModalShow
 
-   
-
-    if (id.services.length === 1) {      
-      localStorage.setItem("service_id", id.services[0].id);      
-    } 
-
-    if (activeButton === "Chatbot") {
-      pageNavigate("/consumer_preference");
+    if (id.services.length === 1) {
+      setViewConsumerBtnLoading(false);
+      localStorage.setItem("service_id", id.services[0].id);
+      handleNextProductClick();
+      productModalShow();
     } else {
-      await axiosInstance
-        .post("/get_parent_products", {
-          client_id: localStorage.getItem("client_id"),
-          service_id: localStorage.getItem("service_id"),
-        })
-        .then((response) => {
-          if (response.data.error_code === 200) {
-            setProductCategory(response.data.data);
-            setFormData({});
-            setValidationErrors({});
-            setCurrentQuestions([]);
-            setCurrentQuestionIndex(0);
-          } else {
-            toast.error(response.data.message);
-          }
-        });
+      const getServiceParamters = {
+        client_id: localStorage.getItem("client_id"),
+      };
+
+      try {
+        const response = await axiosInstance.post(
+          "/get_services",
+          getServiceParamters
+        );
+        if (response.data.error_code === 200) {
+          setViewConsumerBtnLoading(false);
+          serviceModalShow();
+          SetServices(response.data.data);
+        } else {
+          toast.error(response.data.message);
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -114,7 +123,37 @@ const Home = () => {
     }
   };
 
+  const handleServiceOnChange = (serviceID) => {
+    localStorage.setItem("service_id", serviceID);
+  };
+
+  const handleNextProductClick = async () => {
+    serviceModalClose();
+    if (activeButton === "Chatbot") {
+      pageNavigate("/consumer_preference");
+    } else {
+      await axiosInstance
+        .post("/get_parent_products", {
+          client_id: localStorage.getItem("client_id"),
+          service_id: localStorage.getItem("service_id"),
+        })
+        .then((response) => {
+          if (response.data.error_code === 200) {
+            productModalShow();
+            setProductCategory(response.data.data);
+            setFormData({});
+            setValidationErrors({});
+            setCurrentQuestions([]);
+            setCurrentQuestionIndex(0);
+          } else {
+            toast.error(response.data.message);
+          }
+        });
+    }
+  };
+
   const handleNextButtonClick = () => {
+    productModalClose();
     const productId = localStorage.getItem("product_id");
 
     const selectedCategory = productCategory.find(
@@ -132,38 +171,6 @@ const Home = () => {
       }
     } else {
       toast.error("Selected category not found.");
-    }
-  };
-
-  const handleChatbotNextClick = async () => {
-    setBtnLoading(true);
-    const getAttributesParamters = {
-      client_id: localStorage.getItem("client_id"),
-      service_id: localStorage.getItem("service_id"),
-      product_id: localStorage.getItem("product_id"),
-    };
-
-    try {
-      const response = await axiosInstance.post(
-        "/get_attributes",
-        getAttributesParamters
-      );
-      if (response.data.error_code === 200) {
-        setBtnLoading(false);
-        if (response.data.data.main_criteria_pairs.length > 0) {
-          handleClose();
-          pageNavigate("/consumer_preference");
-        } else {
-          handleClose();
-          pageNavigate("/consumer_preference");
-          // handleShow();
-          // setMainCreteriaContent(true);
-        }
-      } else {
-        toast.error(response.data.message);
-      }
-    } catch (error) {
-      toast.error(error);
     }
   };
 
@@ -382,7 +389,6 @@ const Home = () => {
                 <div className="py-3">
                   <p className="card-text imagePlaceholder w-100 placeholder rounded-4"></p>
                 </div>
-                <h5 className="card-title py-3 w-50 placeholder rounded-2"></h5>
                 <p className="card-text py-5 w-100 placeholder rounded-2"></p>
               </div>
               <div className="card-footer py-3 bg-white rounded-4">
@@ -448,8 +454,6 @@ const Home = () => {
                           localStorage.removeItem("product_id");
                           redirectCategoryPage(product, product.name);
                         }}
-                        data-bs-toggle="modal"
-                        data-bs-target={`#exampleModalToggle-${product.id}`}
                         disabled={
                           activeButton === ""
                             ? "disabled"
@@ -458,7 +462,22 @@ const Home = () => {
                             : "disabled"
                         }
                       >
-                        View consumer experience
+                        {viewConsumerBtnLoading === true &&
+                        enableViewButton === product.id ? (
+                          <>
+                            <div
+                              className="spinner-border spinner-border-sm me-3"
+                              role="status"
+                            >
+                              <span className="visually-hidden">
+                                Loading...
+                              </span>
+                            </div>
+                            <span>Loading</span>
+                          </>
+                        ) : (
+                          "View consumer experience"
+                        )}
                       </button>
                     ) : (
                       <button
@@ -476,7 +495,22 @@ const Home = () => {
                             : "disabled"
                         }
                       >
-                        View consumer experience
+                        {viewConsumerBtnLoading &&
+                        enableViewButton === product.id ? (
+                          <>
+                            <div
+                              className="spinner-border spinner-border-sm me-3"
+                              role="status"
+                            >
+                              <span className="visually-hidden">
+                                Loading...
+                              </span>
+                            </div>
+                            <span>Loading</span>
+                          </>
+                        ) : (
+                          "View consumer experience"
+                        )}
                       </button>
                     )}
                   </div>
@@ -486,136 +520,6 @@ const Home = () => {
           )
         )}
       </div>
-
-      {/*Slider-Chatbot Modals */}
-      {products.map((product) =>
-        activeButton === "Slider" ? (
-          <div
-            key={product.id}
-            className="modal fade"
-            id={`exampleModalToggle-${product.id}`}
-            aria-hidden="true"
-            aria-labelledby={`exampleModalToggleLabel-${product.id}`}
-            tabIndex="-1"
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5
-                    className="modal-title"
-                    id={`exampleModalToggleLabel-${product.id}`}
-                  >
-                    {product.name}
-                  </h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  <label htmlFor="service" className="form-label">
-                    What services are you looking for in {product.name} ?
-                  </label>
-
-                  <select
-                    className="form-select"
-                    aria-label="Default select example"
-                    name="Default_select_example"
-                    onChange={(e) => handleOnChange(e.target.value)}
-                  >
-                    <option value="">Select service</option>
-                    {productCategory.length > 0
-                      ? productCategory.map((category, index) => {
-                          return (
-                            <option
-                              value={category.id}
-                              key={index}
-                            >
-                              {category.name}
-                            </option>
-                          );
-                        })
-                      : null}
-                  </select>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    data-bs-dismiss="modal"
-                    onClick={handleNextButtonClick}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div
-            key={product.id}
-            className="modal fade"
-            id={`exampleModalToggle-${product.id}`}
-            aria-hidden="true"
-            aria-labelledby={`exampleModalToggleLabel-${product.id}`}
-            tabIndex="-1"
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5
-                    className="modal-title"
-                    id={`exampleModalToggleLabel-${product.id}`}
-                  >
-                    {product.name}
-                  </h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  <label htmlFor="service" className="form-label">
-                    What services are you looking for in {product.name} ?
-                  </label>
-
-                  <select
-                    className="form-select"
-                    aria-label="Default select example"
-                    name="Default_select_example"
-                    onChange={(e) => handleOnChange(e.target.value)}
-                  >
-                    <option value="">select service</option>
-                    {productCategory.length > 0
-                      ? productCategory.map((category, index) => {
-                          return (
-                            <option value={category.id} key={index}>
-                              {category.name}
-                            </option>
-                          );
-                        })
-                      : null}
-                  </select>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    data-bs-dismiss="modal"
-                    onClick={handleChatbotNextClick}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )
-      )}
 
       <Modal
         show={show}
@@ -671,25 +575,91 @@ const Home = () => {
         )}
       </Modal>
 
+      {services && services.length > 0 ? (
+        <Modal
+          show={serviceShow}
+          onHide={serviceModalClose}
+          backdrop="static"
+          keyboard={false}
+          centered
+        >
+          <Modal.Header closeButton>
+            {/* <Modal.Title>Modal title</Modal.Title> */}
+          </Modal.Header>
+          <Modal.Body>
+            <label htmlFor="service" className="form-label">
+              What services are you looking for in ?
+            </label>
+
+            <select
+              className="form-select"
+              aria-label="Default select example"
+              name="Default_select_example"
+              onChange={(e) => handleServiceOnChange(e.target.value)}
+            >
+              <option value="">Select service</option>
+              {services.length > 0
+                ? services.map((category, index) => {
+                    return (
+                      <option value={category.id} key={index}>
+                        {category.name}
+                      </option>
+                    );
+                  })
+                : null}
+            </select>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={serviceModalClose}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={handleNextProductClick}>
+              Next
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      ) : null}
 
       <Modal
-        show={serviceShow}
-        onHide={serviceModalClose}
+        show={productShow}
+        onHide={productModalClose}
         backdrop="static"
         keyboard={false}
+        centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>Modal title</Modal.Title>
+          {/* <Modal.Title>Modal title</Modal.Title> */}
         </Modal.Header>
         <Modal.Body>
-          I will not close if you click outside me. Do not even try to press
-          escape key.
+          <label htmlFor="service" className="form-label">
+            What products are you looking for in ?
+          </label>
+
+          <select
+            className="form-select"
+            aria-label="Default select example"
+            name="Default_select_example"
+            onChange={(e) => handleOnChange(e.target.value)}
+          >
+            <option value="">Select Product</option>
+            {productCategory.length > 0
+              ? productCategory.map((category, index) => {
+                  return (
+                    <option value={category.id} key={index}>
+                      {category.name}
+                    </option>
+                  );
+                })
+              : null}
+          </select>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={serviceModalClose}>
+          <Button variant="secondary" onClick={productModalClose}>
             Close
           </Button>
-          <Button variant="primary">Understood</Button>
+          <Button variant="primary" onClick={handleNextButtonClick}>
+            Next
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>
