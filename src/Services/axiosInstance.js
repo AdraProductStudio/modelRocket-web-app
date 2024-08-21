@@ -5,8 +5,8 @@ import toast from "react-hot-toast";
 let token = null;
 
 const axiosInstance = axios.create({
-  // baseURL: "https://consumerapi.matsuritech.com",
-  baseURL: "http://10.10.24.1:5000",
+  baseURL: "https://consumerapi.matsuritech.com",
+  // baseURL: "http://10.10.24.1:5000",
   headers: {
     "Content-Type": "application/json",
   },
@@ -21,7 +21,7 @@ const getToken = async () => {
     const basicAuth = "Basic " + btoa(`${username}:${password}`);
 
     const response = await axios.get(
-      "http://10.10.24.1:5000/gettoken",
+      "https://consumerapi.matsuritech.com/gettoken",
       {
         headers: {
           Authorization: basicAuth,

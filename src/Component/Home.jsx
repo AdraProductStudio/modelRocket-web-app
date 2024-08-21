@@ -64,7 +64,7 @@ const Home = () => {
         const basicAuth = "Basic " + btoa(`${username}:${password}`);
 
         const response = await axios.get(
-          "http://10.10.24.1:5000/gettoken",
+          "https://consumerapi.matsuritech.com/gettoken",
           {
             headers: {
               Authorization: basicAuth,
