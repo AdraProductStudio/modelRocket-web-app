@@ -20,8 +20,7 @@ const ConsumerPreferenceChatbotLayout = () => {
     timestamp: new Date(),
     message: "",
   });
-  const [conversationId, setConversationId] = useState(null);
-  const [init, setInit] = useState(false);
+  const [conversationId, setConversationId] = useState(null);  
 
   const [randomNumber, setRandomNumber] = useState(
     Math.floor(Math.random() * (9999999999 - 1000000000 + 1)) + 1000000000
@@ -37,6 +36,8 @@ const ConsumerPreferenceChatbotLayout = () => {
         flag: "init",
         usr_phoneno: randomNumber,
       };
+
+      console.log(requiredParams)
 
       try {
         await axiosInstance
@@ -57,7 +58,7 @@ const ConsumerPreferenceChatbotLayout = () => {
     };
 
     getChatbot();
-  }, [init]);
+  }, []);
 
   const [graphData, setGraphData] = useState({});
 
@@ -70,8 +71,11 @@ const ConsumerPreferenceChatbotLayout = () => {
       usr_phoneno: randomNumber,
     };
 
+    console.log(requiredParams)
+
     try {
       const result = await axiosInstance.post("/chatbot_new", requiredParams);
+      console.log(result.data)
       if (result.data.error_code === 200) {
         setTimeout(() => {
           getOfferProduct();
@@ -117,8 +121,7 @@ const ConsumerPreferenceChatbotLayout = () => {
             newData[key] = 0.25;
           }
         }
-        setGraphData(newData);
-        setInit(!init);
+        setGraphData(newData);        
       }
     } catch (error) {
       console.error("Error:", error);
