@@ -1,4 +1,4 @@
-import React, {  useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axiosInstance from "../../Services/axiosInstance";
 import { DataAnalysisGrapgh } from "./DataAnalysisGrapgh";
 import Slider from "react-slick";
@@ -6,10 +6,7 @@ import { Tooltip } from "react-tooltip";
 import { FaInfoCircle } from "react-icons/fa";
 import ConsumerPreferenceChatbotLayout from "./ConsumerPreferenceChatbotLayout";
 
-
 const ConsumerPreferenceLayout = () => {
-  
-
   const [initialGlow, setInitialGlow] = useState(false);
   const dummySlider = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
   const [sliderIndex, setSliderIndex] = useState(0); // Track slider index
@@ -35,17 +32,20 @@ const ConsumerPreferenceLayout = () => {
 
       try {
         await axiosInstance.post("/get_attributes", getProduct).then((res) => {
-          setInitialGlow(false);
-          setApiRequest(res.data.data);
-          setMainCriteriaPairs(res.data.data.main_criteria_pairs);
-
-          var props = {
-            client_id: localStorage.getItem("client_id"),
-            product_category_id: localStorage.getItem("product_id"),
-            requestData: res.data.data,
-          };
-
-          handleDone(props);
+       console.log(res.data)
+          if(res.data.error_code === 200){
+            setInitialGlow(false);
+            setApiRequest(res.data.data);
+            setMainCriteriaPairs(res.data.data.main_criteria_pairs);
+  
+            var props = {
+              client_id: localStorage.getItem("client_id"),
+              product_category_id: localStorage.getItem("product_id"),
+              requestData: res.data.data,
+            };
+  
+            handleDone(props);
+          }        
         });
       } catch (err) {
         console.log(err);
@@ -121,7 +121,7 @@ const ConsumerPreferenceLayout = () => {
         filters: { criteria: "", condition: "", value1: "", value2: "" },
       };
 
-      next();
+      
     } else {
       const defaultValuesSetting = Array(
         params.requestData.main_criteria_pairs.length
@@ -140,8 +140,10 @@ const ConsumerPreferenceLayout = () => {
       );
 
       if (response.data.error_code === 200) {
+        next();
         setProductComparison(response.data.data.product_comparisons);
         setGraphData(response.data.data.criteria_weights);
+        
       } else {
         console.log(response.data.message);
       }

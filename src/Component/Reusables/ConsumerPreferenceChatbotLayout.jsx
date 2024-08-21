@@ -85,8 +85,14 @@ const ConsumerPreferenceChatbotLayout = () => {
       } else {
         return "Hey! Something went wrong. Can you please ask again";
       }
-    } catch (err) {
-      console.log(err);
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.status === 401 &&
+        error.response.data.msg === "Token has expired"
+      ) {
+        return "Session Expired! Please try again...!";        
+      }
     }
   };
 

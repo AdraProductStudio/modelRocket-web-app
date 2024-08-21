@@ -7,6 +7,7 @@ import { FaInfoCircle } from "react-icons/fa";
 import { Tooltip } from "react-tooltip";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import CommonContext from "./CommonContext";
+import axios from "axios";
 
 const Home = () => {
   const { productViewType, setProductViewType } = useContext(CommonContext);
@@ -54,6 +55,33 @@ const Home = () => {
 
   useEffect(() => {
     setInitialGlow(true);
+    const getToken = async () => {
+      try {
+        const username = "matsuri";
+        const password =
+          "fc153ac36455604c6a6bcb3e22c0a4debfb746d59ad4a33a4b0d50f315206958d78da64e88957993e537e5ef235537a65ac0bc8fbaa725ae3e8e151617e82b81";
+
+        const basicAuth = "Basic " + btoa(`${username}:${password}`);
+
+        const response = await axios.get(
+          "http://10.10.24.1:5000/gettoken",
+          {
+            headers: {
+              Authorization: basicAuth,
+            },
+          }
+        );
+        if (response.data.error_code === 200) {
+          fetchData();
+          localStorage.setItem("token", response.data.data.token);
+        }
+      } catch (error) {
+        console.error("Error getting token:", error);
+        throw error;
+      }
+    };
+
+    getToken();
 
     const fetchData = async () => {
       try {
@@ -61,17 +89,15 @@ const Home = () => {
         if (response.data.error_code === 200) {
           setProducts(response.data.data);
           setInitialGlow(false);
-          localStorage.removeItem("service_id");
         } else {
           toast.error(response.data.message);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Failed to fetch data");
+        toast.error("Session expired, please try again...!");
+
+        console.error("Error fetching data:", error);        
       }
     };
-
-    fetchData();
   }, []);
 
   const [services, SetServices] = useState([]);
@@ -96,8 +122,7 @@ const Home = () => {
           "/get_services",
           getServiceParamters
         );
-        if (response.data.error_code === 200) {
-          setViewConsumerBtnLoading(false);
+        if (response.data.error_code === 200) {         
           serviceModalShow();
           SetServices(response.data.data);
         } else {
@@ -105,6 +130,8 @@ const Home = () => {
         }
       } catch (error) {
         console.log(error);
+      } finally{
+        setViewConsumerBtnLoading(false);
       }
     }
   };
@@ -193,14 +220,16 @@ const Home = () => {
     return question.correct_answer === userInput;
   };
 
+
   const handleNextQuestion = () => {
     const currentQuestion = currentQuestions[currentQuestionIndex];
     const error = validateQuestion(currentQuestion);
+    
     if (error) {
       if (error.type === "empty") {
         toast.error("Input should not be empty");
       } else {
-        toast(error, {
+        toast(error.message, {
           icon: <IoIosInformationCircleOutline className="infoToast me-1" />,
         });
       }
@@ -209,34 +238,42 @@ const Home = () => {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
       } else {
         setBtnLoading(true);
-
-        const getAttributesParamters = {
-          client_id: localStorage.getItem("client_id"),
-          service_id: localStorage.getItem("service_id"),
-          product_id: localStorage.getItem("product_id"),
-        };
-        axiosInstance
-          .post("/get_attributes", getAttributesParamters)
-          .then((response) => {
-            if (response.data.error_code === 200) {
-              setBtnLoading(false);
-              if (response.data.data.main_criteria_pairs.length > 0) {
-                handleClose();
-                pageNavigate("/consumer_preference");
+  
+        try {
+          const getAttributesParamters = {
+            client_id: localStorage.getItem("client_id"),
+            service_id: localStorage.getItem("service_id"),
+            product_id: localStorage.getItem("product_id"),
+          };
+          axiosInstance
+            .post("/get_attributes", getAttributesParamters)
+            .then((response) => {
+              console.log(response.data);
+              if (response.data.error_code === 200) {                
+                if (response.data.data.main_criteria_pairs.length > 0) {
+                  handleClose();
+                  pageNavigate("/consumer_preference");
+                } else {
+                  handleShow();
+                  setMainCreteriaContent(true);
+                }
               } else {
-                handleShow();
-                setMainCreteriaContent(true);
+                toast.error(response.data.message);
               }
-            } else {
-              toast.error(response.data.message);
-            }
-          })
-          .catch((err) => {
-            toast.error(err);
-          });
+            })
+            .catch((err) => {
+              // toast.error(err.message); // Use err.message instead of err
+            });
+        } catch (error) {
+          console.log(error);
+          // toast.error(error.message); // Handle error here as well
+        } finally{
+          setBtnLoading(false);
+        }
       }
     }
   };
+
 
   const handlePreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
