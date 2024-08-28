@@ -223,13 +223,13 @@ const Home = () => {
 
   const handleNextQuestion = () => {
     const currentQuestion = currentQuestions[currentQuestionIndex];
-    const error = validateQuestion(currentQuestion);
+    const error = validateQuestion(currentQuestion);    
     
-    if (error) {
+    if (error) {      
       if (error.type === "empty") {
         toast.error("Input should not be empty");
       } else {
-        toast(error.message, {
+        toast(error, {
           icon: <IoIosInformationCircleOutline className="infoToast me-1" />,
         });
       }
