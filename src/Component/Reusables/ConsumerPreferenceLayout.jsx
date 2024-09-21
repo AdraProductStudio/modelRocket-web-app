@@ -5,6 +5,7 @@ import Slider from "react-slick";
 import { Tooltip } from "react-tooltip";
 import { FaInfoCircle } from "react-icons/fa";
 import ConsumerPreferenceChatbotLayout from "./ConsumerPreferenceChatbotLayout";
+import toast from "react-hot-toast";
 
 const ConsumerPreferenceLayout = () => {
   const [initialGlow, setInitialGlow] = useState(false);
@@ -32,7 +33,6 @@ const ConsumerPreferenceLayout = () => {
 
       try {
         await axiosInstance.post("/get_attributes", getProduct).then((res) => {
-       console.log(res.data)
           if(res.data.error_code === 200){
             setInitialGlow(false);
             setApiRequest(res.data.data);
@@ -145,7 +145,7 @@ const ConsumerPreferenceLayout = () => {
         setGraphData(response.data.data.criteria_weights);
         
       } else {
-        console.log(response.data.message);
+        toast.error(response.data.message);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -180,9 +180,7 @@ const ConsumerPreferenceLayout = () => {
       if (response.data.error_code === 200) {
         setProductComparison(response.data.data.product_comparisons);
         setGraphData(response.data.data.criteria_weights);
-      } else {
-        console.log(response.data.message);
-      }
+      } 
     } catch (error) {
       console.error("Error:", error);
     }

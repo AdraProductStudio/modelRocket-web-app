@@ -1,18 +1,17 @@
-import { createContext, useState } from "react";
+import { createContext, useRef, useState } from "react";
 
 const CommonContext =  createContext();
 
 export const DataProvider = ({children}) => {
-
-    const [productViewType, setProductViewType] = useState({})
-
+    const timerRef = useRef(null);
+    const [productViewType, setProductViewType] = useState({});
 
     return(
         <CommonContext.Provider 
             value={{
                 productViewType,
-                setProductViewType
-
+                setProductViewType,
+                timerRef
             }}
             >
             {children}

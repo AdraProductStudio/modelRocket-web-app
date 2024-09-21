@@ -53,18 +53,23 @@ const Home = () => {
 
   const pageNavigate = useNavigate();
 
+  useEffect(()=>{
+    localStorage.removeItem("service_name")
+    localStorage.removeItem("layout")
+    localStorage.removeItem("client_name")
+  },[])
+
   useEffect(() => {
     setInitialGlow(true);
     const getToken = async () => {
       try {
-        const username = "matsuri";
-        const password =
-          "fc153ac36455604c6a6bcb3e22c0a4debfb746d59ad4a33a4b0d50f315206958d78da64e88957993e537e5ef235537a65ac0bc8fbaa725ae3e8e151617e82b81";
+        const username = process.env.REACT_APP_USERNAME;
+        const password = process.env.REACT_APP_PASSWORD;
 
         const basicAuth = "Basic " + btoa(`${username}:${password}`);
 
         const response = await axios.get(
-          "https://consumerapi.matsuritech.com/gettoken",
+          `${process.env.REACT_APP_API_URI}/gettoken`,
           {
             headers: {
               Authorization: basicAuth,
@@ -89,13 +94,11 @@ const Home = () => {
         if (response.data.error_code === 200) {
           setProducts(response.data.data);
           setInitialGlow(false);
-        } else {
-          toast.error(response.data.message);
-        }
+        } 
       } catch (error) {
         toast.error("Session expired, please try again...!");
 
-        console.error("Error fetching data:", error);        
+        console.error("Error fetching data:", error);
       }
     };
   }, []);
@@ -106,10 +109,13 @@ const Home = () => {
     setViewConsumerBtnLoading(true);
     setProductCategory([]);
     localStorage.setItem("client_id", id.id);
+    localStorage.setItem("client_name", id.name);
 
     if (id.services.length === 1) {
       setViewConsumerBtnLoading(false);
       localStorage.setItem("service_id", id.services[0].id);
+      localStorage.setItem("service_name", id.services[0].name);
+
       handleNextProductClick();
       productModalShow();
     } else {
@@ -122,7 +128,7 @@ const Home = () => {
           "/get_services",
           getServiceParamters
         );
-        if (response.data.error_code === 200) {         
+        if (response.data.error_code === 200) {
           serviceModalShow();
           SetServices(response.data.data);
         } else {
@@ -130,7 +136,7 @@ const Home = () => {
         }
       } catch (error) {
         console.log(error);
-      } finally{
+      } finally {
         setViewConsumerBtnLoading(false);
       }
     }
@@ -150,8 +156,9 @@ const Home = () => {
     }
   };
 
-  const handleServiceOnChange = (serviceID) => {
-    localStorage.setItem("service_id", serviceID);
+  const handleServiceOnChange = (serviceID) => {   
+    localStorage.setItem("service_id", serviceID.id);
+    localStorage.setItem("service_name", serviceID.name);
   };
 
   const handleNextProductClick = async () => {
@@ -220,12 +227,11 @@ const Home = () => {
     return question.correct_answer === userInput;
   };
 
-
   const handleNextQuestion = () => {
     const currentQuestion = currentQuestions[currentQuestionIndex];
-    const error = validateQuestion(currentQuestion);    
-    
-    if (error) {      
+    const error = validateQuestion(currentQuestion);
+
+    if (error) {
       if (error.type === "empty") {
         toast.error("Input should not be empty");
       } else {
@@ -238,7 +244,7 @@ const Home = () => {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
       } else {
         setBtnLoading(true);
-  
+
         try {
           const getAttributesParamters = {
             client_id: localStorage.getItem("client_id"),
@@ -248,8 +254,7 @@ const Home = () => {
           axiosInstance
             .post("/get_attributes", getAttributesParamters)
             .then((response) => {
-              console.log(response.data);
-              if (response.data.error_code === 200) {                
+              if (response.data.error_code === 200) {
                 if (response.data.data.main_criteria_pairs.length > 0) {
                   handleClose();
                   pageNavigate("/consumer_preference");
@@ -267,13 +272,12 @@ const Home = () => {
         } catch (error) {
           console.log(error);
           // toast.error(error.message); // Handle error here as well
-        } finally{
+        } finally {
           setBtnLoading(false);
         }
       }
     }
   };
-
 
   const handlePreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
@@ -632,13 +636,21 @@ const Home = () => {
               className="form-select"
               aria-label="Default select example"
               name="Default_select_example"
-              onChange={(e) => handleServiceOnChange(e.target.value)}
+              onChange={(e) =>
+                handleServiceOnChange(JSON.parse(e.target.value))
+              }
             >
               <option value="">Select service</option>
               {services.length > 0
                 ? services.map((category, index) => {
                     return (
-                      <option value={category.id} key={index}>
+                      <option
+                        value={JSON.stringify({
+                          id: category.id,
+                          name: category.name,
+                        })}
+                        key={index}
+                      >
                         {category.name}
                       </option>
                     );

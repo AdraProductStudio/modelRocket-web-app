@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import axiosInstance from "../../Services/axiosInstance";
 import { DataAnalysisGrapgh } from "./DataAnalysisGrapgh";
 import { Tooltip } from "react-tooltip";
@@ -6,8 +6,15 @@ import { FaInfoCircle } from "react-icons/fa";
 import "../../../src/ConsumerPreferenceChatbotLayout.css";
 import { IoPerson } from "react-icons/io5";
 import botImage from "../assets/model-rocket-bot.svg";
+import toast from "react-hot-toast";
+import { useLocation, useNavigate } from "react-router-dom";
+import CommonContext from "../CommonContext";
 
 const ConsumerPreferenceChatbotLayout = () => {
+  const {timerRef} = useContext(CommonContext);
+  const pageNavigate = useNavigate();
+  const location = useLocation();
+
   const [viewCharts, setViewCharts] = useState(false);
   const [viewGraph, setViewGraph] = useState(false);
 
@@ -20,34 +27,40 @@ const ConsumerPreferenceChatbotLayout = () => {
     timestamp: new Date(),
     message: "",
   });
-  const [conversationId, setConversationId] = useState(null);  
+  const [conversationId, setConversationId] = useState(null);
+
+  const [isUserResponding, setIsUserResponding] = useState(false);
 
   const [randomNumber, setRandomNumber] = useState(
     Math.floor(Math.random() * (9999999999 - 1000000000 + 1)) + 1000000000
   );
 
+
   useEffect(() => {
     setRandomNumber(randomNumber);
     const getChatbot = async () => {
       var requiredParams = {
-        client_id: localStorage.getItem("client_id"),
-        service_id: localStorage.getItem("service_id"),
+        client_name: localStorage.getItem("client_name"),
+        service_name: localStorage.getItem("service_name"),
         msg: userTextInput,
         flag: "init",
-        usr_phoneno: randomNumber,
+        session_id: randomNumber,
       };
-
-      console.log(requiredParams)
 
       try {
         await axiosInstance
-          .post("/chatbot_new", requiredParams)
+          .post('/chatbot_widget', requiredParams)
           .then((response) => {
-            setchatbotMessage({
-              timestamp: new Date(),
-              message: response.data.data.message,
-            });
-            setConversationId(response.data.data.conversation_id);            
+            if (response.data.error_code === 200) {
+              setchatbotMessage({
+                timestamp: new Date(),
+                message: response.data.data.message,
+              });
+              setConversationId(response.data.data.conversation_id);
+              startIdleTracking(); // Start idle tracking on user activity
+            } else {
+              toast.error(response.data.message);
+            }
           })
           .catch((err) => {
             console.log(err);
@@ -64,22 +77,30 @@ const ConsumerPreferenceChatbotLayout = () => {
 
   const chatbotResponse = async (userInput, stage) => {
     var requiredParams = {
-      client_id: localStorage.getItem("client_id"),
-      service_id: localStorage.getItem("service_id"),
+      client_name: localStorage.getItem("client_name"),
+      service_name: localStorage.getItem("service_name"),
       msg: userInput,
       flag: stage,
-      usr_phoneno: randomNumber,
+      session_id: randomNumber,
     };
 
-    console.log(requiredParams)
-
     try {
-      const result = await axiosInstance.post("/chatbot_new", requiredParams);
-      console.log(result.data)
+      const result = await axiosInstance.post(
+        '/chatbot_widget',
+        requiredParams
+      );
+
+      
       if (result.data.error_code === 200) {
         setTimeout(() => {
           getOfferProduct();
-        }, 2000);
+        }, 2000);        
+        return result.data.data.message;
+      } else if (result.data.error_code === 201) {
+        clearTimeout( timerRef.current);
+        setTimeout(()=>{
+          pageNavigate("/")
+        },5000)
         return result.data.data.message;
       } else if (
         result.data.error_code === 500 &&
@@ -95,7 +116,7 @@ const ConsumerPreferenceChatbotLayout = () => {
         error.response.status === 401 &&
         error.response.data.msg === "Token has expired"
       ) {
-        return "Session Expired! Please try again...!";        
+        return "Session Expired! Please try again...!";
       }
     }
   };
@@ -104,7 +125,7 @@ const ConsumerPreferenceChatbotLayout = () => {
     const requiredParams = {
       conversation_id: conversationId,
     };
-    
+
     try {
       const response = await axiosInstance.post("/get_offer", requiredParams);
 
@@ -121,7 +142,7 @@ const ConsumerPreferenceChatbotLayout = () => {
             newData[key] = 0.25;
           }
         }
-        setGraphData(newData);        
+        setGraphData(newData);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -146,6 +167,7 @@ const ConsumerPreferenceChatbotLayout = () => {
     }, 1);
 
     const response = await chatbotResponse(input, "step");
+    resetIdleTracking()
 
     const newEssenceMessage = {
       text: response,
@@ -186,18 +208,42 @@ const ConsumerPreferenceChatbotLayout = () => {
     }
   };
 
- 
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const ampm = hours >= 12 ? "PM" : "AM";
     const formattedHours = hours % 12 || 12; // Convert 0 to 12 for AM/PM format
-    const formattedMinutes = minutes.toString().padStart(2, '0');
-    const formattedSeconds = seconds.toString().padStart(2, '0');
+    const formattedMinutes = minutes.toString().padStart(2, "0");
+    const formattedSeconds = seconds.toString().padStart(2, "0");
     return `${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm}`;
   };
+
+  const startIdleTracking = () => {
+    timerRef.current = setTimeout(async () => {
+      const response = await chatbotResponse("", "step");
+      if(response){
+        resetIdleTracking()
+      }
+     
+      const newEssenceMessage = {
+        text: response,
+        user: false,
+        timestamp: new Date(),
+      };
+      setMessages((prevMessages) => [...prevMessages, newEssenceMessage]);
+   
+    }, process.env.REACT_APP_CHAT_IDLE_TIMEOUT); // First idle check after 5 seconds
+  };
+  
+  const resetIdleTracking = () => { 
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      startIdleTracking()
+    }
+  };
+
 
   return (
     <>
